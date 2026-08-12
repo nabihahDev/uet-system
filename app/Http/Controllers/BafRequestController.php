@@ -29,7 +29,14 @@ class BafRequestController extends Controller
 
     public function create()
     {
-        return view('requests.form', ['requestModel' => new BafRequest]);
+        $user = Auth::user();
+
+        return view('requests.form', [
+            'requestModel' => new BafRequest,
+            'canEditRequester' => $user->role_id === 1,
+            'canEditVoteController' => false,
+            'canEditAuthoriser' => false,
+        ]);
     }
 
     public function store(Request $request)
@@ -77,7 +84,20 @@ class BafRequestController extends Controller
 
     public function show(BafRequest $requestModel)
     {
-        return view('requests.show', ['requestModel' => $requestModel]);
+        $user = Auth::user();
+        $status = $requestModel->status;
+
+        return view('requests.show', [
+            'requestModel' => $requestModel,
+            // Role 1 (User / Requester) can edit if draft or returned
+            'canEditRequester' => ($user->role_id === 1) && in_array($status, ['draft', 'returned']),
+            
+            // Role 2 / OC (or Vote Controller) can edit when submitted
+            'canEditVoteController' => ($user->role_id === 2 || $user->role_id === 4) && in_array($status, ['submitted', 'oc_endorsed']),
+            
+            // Role 3 (CO) / Authoriser can edit when endorsed
+            'canEditAuthoriser' => in_array($user->role_id, [2, 3, 6]) && in_array($status, ['submitted', 'oc_endorsed', 'co_authorized']),
+        ]);
     }
 
     public function update(Request $request, BafRequest $requestModel)
