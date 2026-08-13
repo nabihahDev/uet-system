@@ -53,11 +53,28 @@
             box-sizing: border-box;
             background-color: #ffffff;
         }
-        .baf-input:read-only {
+        .baf-input:read-only, .baf-textarea:read-only {
             background-color: #e5e7eb;
             color: #6b7280;
             cursor: not-allowed;
         }
+
+        /* Dynamic Auto-Expanding Textarea Styling */
+        .baf-textarea {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 4px 6px;
+            font-size: 11px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            font-family: inherit;
+            resize: none;
+            min-height: 26px;
+            overflow-y: hidden;
+            display: block;
+        }
+
         .baf-table {
             width: 100%;
             border-collapse: collapse;
@@ -68,24 +85,23 @@
         .baf-table th, .baf-table td {
             border: 1px solid #111827;
             padding: 4px;
+            vertical-align: top;
         }
         .baf-table th {
             background-color: #f3f4f6;
             font-weight: 700;
         }
-        /* Container to let the delete button float outside the table border */
+
         .baf-table-wrapper {
             position: relative;
             overflow-x: auto;
-            padding-right: 32px; /* Extra space on the right for floating buttons */
+            padding-right: 32px;
         }
 
-        /* Row wrapper positioning */
         .baf-table tr {
             position: relative;
         }
 
-        /* Floating remove button anchored to the right side of the row */
         .baf-btn-floating-remove {
             position: absolute;
             right: -28px;
@@ -112,7 +128,6 @@
             transform: translateY(-50%) scale(1.1);
         }
 
-        /* Styling for the Add Item button right under the table */
         .baf-add-btn-container {
             display: flex;
             justify-content: flex-end;
@@ -137,21 +152,6 @@
 
         .baf-btn-add:hover {
             background-color: #0066CC;
-        }
-
-        /* Style for remove row button inside table */
-        .baf-btn-remove {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-            border-radius: 3px;
-            padding: 2px 6px;
-            font-size: 10px;
-            cursor: pointer;
-        }
-
-        .baf-btn-remove:hover {
-            background-color: #dc2626;
         }
 
         .baf-picking-box {
@@ -191,11 +191,6 @@
             border-color: #0066CC;
             background-color: #f5f3ff;
         }
-        .baf-two-col {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
         .baf-btn {
             padding: 8px 16px;
             border-radius: 4px;
@@ -230,14 +225,13 @@
                     <div style="margin-top: 10px; display: flex; gap: 16px; align-items: center;">
                         <span style="font-weight: bold;">Indicate Requisition Type:</span>
                         @php $type = old('req_type', $requestModel->req_type ?? 'stock'); @endphp
-                        <!-- FIXED CODE -->
-<label><input type="radio" name="req_type" value="stock" {{ $type == 'stock' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> STOCK (Catalogued Items)</label>
-<label><input type="radio" name="req_type" value="services" {{ $type == 'services' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> SERVICES (Non-Catalogued Items)</label>
-<label><input type="radio" name="req_type" value="return" {{ $type == 'return' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> RETURN TO STORE (Credits)</label>
+                        <label><input type="radio" name="req_type" value="stock" {{ $type == 'stock' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> STOCK (Catalogued Items)</label>
+                        <label><input type="radio" name="req_type" value="services" {{ $type == 'services' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> SERVICES (Non-Catalogued Items)</label>
+                        <label><input type="radio" name="req_type" value="return" {{ $type == 'return' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> RETURN TO STORE (Credits)</label>
 
-@if(!$canEditRequester)
-    <input type="hidden" name="req_type" value="{{ $type }}">
-@endif
+                        @if(!$canEditRequester)
+                            <input type="hidden" name="req_type" value="{{ $type }}">
+                        @endif
                     </div>
                 </div>
                 <div style="text-align: right;">
@@ -293,18 +287,18 @@
                         @foreach($items as $index => $item)
                         <tr class="item-row">
                             <td class="row-index">{{ $loop->iteration }}</td>
-                            <td><input type="text" name="items[{{ $index }}][qty]" value="{{ $item['qty'] ?? '1' }}" class="baf-input item-qty" style="text-align: center;" oninput="calculateTotal()" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][uom]" value="{{ $item['uom'] ?? '' }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][req_type]" value="{{ $item['req_type'] ?? '' }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][stock_code]" value="{{ $item['stock_code'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][manufacturer]" value="{{ $item['manufacturer'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][part_number]" value="{{ $item['part_number'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][description]" value="{{ $item['description'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="number" step="0.01" name="items[{{ $index }}][est_cost]" value="{{ $item['est_cost'] ?? '0.00' }}" class="baf-input item-cost" style="text-align: right;" oninput="calculateTotal()" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][ipc_ref]" value="{{ $item['ipc_ref'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
-                            <td><input type="text" name="items[{{ $index }}][equip_used_on]" value="{{ $item['equip_used_on'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}></td>
+                            <td><textarea name="items[{{ $index }}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['qty'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['uom'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['req_type'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['stock_code'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['manufacturer'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['part_number'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['description'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['est_cost'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['ipc_ref'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['equip_used_on'] ?? '' }}</textarea></td>
                             <td>
-                                <input type="text" name="items[{{ $index }}][reason]" value="{{ $item['reason'] ?? '' }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+                                <textarea name="items[{{ $index }}][reason]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['reason'] ?? '' }}</textarea>
                                 @if($canEditRequester)
                                     <button type="button" class="baf-btn-floating-remove" onclick="removeRow(this)" title="Delete Row">✕</button>
                                 @endif
@@ -341,96 +335,92 @@
                 </div>
             </div>
 
-           <!-- LOWER AUTHORIZATION SECTIONS -->
-<div class="baf-bottom-grid" style="align-items: start;">
-    
-    <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-        <!-- TECHNICAL FIELDS (from 4W / 5W) -->
-        <div class="baf-section-box" style="padding: 8px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EQUIPMENT NO.</label>
-                    <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">WORK ORDER NO.</label>
-                    <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE SUB HEAD</label>
-                    <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                </div>
-            </div>
-        </div>
+            <!-- LOWER AUTHORIZATION SECTIONS -->
+            <div class="baf-bottom-grid" style="align-items: start;">
+                
+                <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="baf-section-box" style="padding: 8px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EQUIPMENT NO.</label>
+                                <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">WORK ORDER NO.</label>
+                                <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE SUB HEAD</label>
+                                <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- VOTE CONTROLLER (from 5W or OC) -->
-        <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}" style="padding: 8px;">
-            <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
-                    <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}" style="padding: 8px;">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
+                                <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE CONTROLLER SIGNATURE</label>
-                    <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
-                    <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- RIGHT COLUMN: REQUESTED BY & AUTHORISED BY -->
-    <div style="display: flex; flex-direction: column; gap: 12px;">
-        <!-- REQUESTED BY -->
-        <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}" style="padding: 8px;">
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
-                    <input type="text" name="req_title" value="{{ old('req_title', $requestModel->req_title ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
-                    <input type="text" name="req_code" value="{{ old('req_code', $requestModel->req_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
-                    <input type="text" name="req_signature" value="{{ old('req_signature', $requestModel->req_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED DATE</label>
-                    <input type="text" name="req_date" placeholder="DD / MM / YYYY" value="{{ old('req_date', $requestModel->req_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
-                </div>
-            </div>
-        </div>
+                <!-- RIGHT COLUMN: REQUESTED BY & AUTHORISED BY -->
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}" style="padding: 8px;">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <input type="text" name="req_title" value="{{ old('req_title', $requestModel->req_title ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
+                                <input type="text" name="req_code" value="{{ old('req_code', $requestModel->req_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <input type="text" name="req_signature" value="{{ old('req_signature', $requestModel->req_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED DATE</label>
+                                <input type="text" name="req_date" placeholder="DD / MM / YYYY" value="{{ old('req_date', $requestModel->req_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                            </div>
+                        </div>
+                    </div>
 
-        <!-- AUTHORISED BY (CO 5W) -->
-        <div class="baf-section-box {{ $canEditAuthoriser ? 'active-review' : '' }}" style="padding: 8px;">
-            <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">AUTHORISED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
-                    <input type="text" name="auth_title" value="{{ old('auth_title', $requestModel->auth_title ?? '') }}" class="baf-input" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                    <div class="baf-section-box {{ $canEditAuthoriser ? 'active-review' : '' }}" style="padding: 8px;">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">AUTHORISED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <input type="text" name="auth_title" value="{{ old('auth_title', $requestModel->auth_title ?? '') }}" class="baf-input" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
+                                <input type="text" name="auth_code" value="{{ old('auth_code', $requestModel->auth_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <input type="text" name="auth_signature" value="{{ old('auth_signature', $requestModel->auth_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
+                                <input type="text" name="auth_date" placeholder="DD / MM / YYYY" value="{{ old('auth_date', $requestModel->auth_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
-                    <input type="text" name="auth_code" value="{{ old('auth_code', $requestModel->auth_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
-                    <input type="text" name="auth_signature" value="{{ old('auth_signature', $requestModel->auth_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
-                </div>
-                <div>
-                    <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
-                    <input type="text" name="auth_date" placeholder="DD / MM / YYYY" value="{{ old('auth_date', $requestModel->auth_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
-                </div>
-            </div>
-        </div>
-    </div>
 
-</div>
+            </div>
 
             <!-- FOOTER LABELS & ACTION BUTTONS -->
             <div style="margin-top: 16px; font-size: 10px; color: #6b7280; display: flex; justify-content: space-between; align-items: flex-end;">
@@ -453,6 +443,11 @@
     </div>
 
     <script>
+        function autoExpand(element) {
+            element.style.height = 'auto';
+            element.style.height = element.scrollHeight + 'px';
+        }
+
         function addNewRow() {
             const tbody = document.getElementById('items-tbody');
             const rowCount = tbody.children.length;
@@ -462,18 +457,18 @@
             newRow.className = 'item-row';
             newRow.innerHTML = `
                 <td class="row-index">${rowCount + 1}</td>
-                <td><input type="text" name="items[${index}][qty]" value="1" class="baf-input item-qty" style="text-align: center;" oninput="calculateTotal()"></td>
-                <td><input type="text" name="items[${index}][uom]" value="" class="baf-input" style="text-align: center;"></td>
-                <td><input type="text" name="items[${index}][req_type]" value="" class="baf-input" style="text-align: center;"></td>
-                <td><input type="text" name="items[${index}][stock_code]" value="" class="baf-input"></td>
-                <td><input type="text" name="items[${index}][manufacturer]" value="" class="baf-input"></td>
-                <td><input type="text" name="items[${index}][part_number]" value="" class="baf-input"></td>
-                <td><input type="text" name="items[${index}][description]" value="" class="baf-input"></td>
-                <td><input type="number" step="0.01" name="items[${index}][est_cost]" value="0.00" class="baf-input item-cost" style="text-align: right;" oninput="calculateTotal()"></td>
-                <td><input type="text" name="items[${index}][ipc_ref]" value="" class="baf-input"></td>
-                <td><input type="text" name="items[${index}][equip_used_on]" value="" class="baf-input"></td>
+                <td><textarea name="items[${index}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
+                <td><textarea name="items[${index}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
+                <td><textarea name="items[${index}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+                <td><textarea name="items[${index}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
                 <td>
-                    <input type="text" name="items[${index}][reason]" value="" class="baf-input">
+                    <textarea name="items[${index}][reason]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea>
                     <button type="button" class="baf-btn-floating-remove" onclick="removeRow(this)" title="Delete Row">✕</button>
                 </td>
             `;
@@ -497,7 +492,7 @@
             const rows = document.querySelectorAll('#items-tbody .item-row');
             rows.forEach((row, i) => {
                 row.querySelector('.row-index').textContent = i + 1;
-                row.querySelectorAll('input').forEach(input => {
+                row.querySelectorAll('textarea').forEach(input => {
                     const name = input.getAttribute('name');
                     if (name) {
                         input.setAttribute('name', name.replace(/items\[\d+\]/, `items[${i}]`));
@@ -510,14 +505,20 @@
             let total = 0;
             const rows = document.querySelectorAll('#items-tbody .item-row');
             rows.forEach(row => {
-                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-                const cost = parseFloat(row.querySelector('.item-cost').value) || 0;
+                const qtyVal = row.querySelector('.item-qty').value.replace(/[^0-9.-]+/g, "");
+                const costVal = row.querySelector('.item-cost').value.replace(/[^0-9.-]+/g, "");
+                
+                const qty = parseFloat(qtyVal) || 0;
+                const cost = parseFloat(costVal) || 0;
                 total += (qty * cost);
             });
 
             document.getElementById('total-cost-display').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        document.addEventListener('DOMContentLoaded', calculateTotal);
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.baf-textarea').forEach(el => autoExpand(el));
+            calculateTotal();
+        });
     </script>
 </x-app-layout>
