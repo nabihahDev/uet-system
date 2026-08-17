@@ -32,7 +32,20 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => [
+                'required', 
+                'string', 
+                'lowercase', 
+                'email', 
+                'max:255', 
+                'unique:'.User::class,
+                // Restrict registration exclusively to allowed domains
+                function ($attribute, $value, $fail) {
+                    if (!str_ends_with($value, '@bah.ngam') && !str_ends_with($value, '@bah.okay')) {
+                        $fail('Emel mestilah berakhiran dengan @bah.ngam (OC) atau @bah.okay (Applicant).');
+                    }
+                },
+            ],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -46,6 +59,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect dynamically based on the email domain
+        if ($user->isOc()) {
+            return redirect(route('oc.dashboard', absolute: false));
+        }
+
+        return redirect(route('applicant.dashboard', absolute: false));
     }
 }

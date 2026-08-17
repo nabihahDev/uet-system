@@ -29,4 +29,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Get the user's role dynamically based on their email domain.
+     */
+    public function getRoleAttribute(): string
+    {
+        if (str_ends_with($this->email, '@bah.ngam')) {
+            return 'oc';
+        }
+
+        if (str_ends_with($this->email, '@bah.okay')) {
+            return 'applicant';
+        }
+
+        return 'applicant';
+    }
+
+    /**
+     * Check if the user is an OC.
+     */
+    public function isOc(): bool
+    {
+        return $this->role === 'oc';
+    }
+
+    /**
+     * Check if the user is an applicant.
+     */
+    public function isApplicant(): bool
+    {
+        return $this->role === 'applicant';
+    }
 }

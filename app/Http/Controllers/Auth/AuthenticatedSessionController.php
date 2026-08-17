@@ -28,7 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        // Redirect OC users (@bah.ngam) to the OC panel
+        if ($user->isOc()) {
+            return redirect()->intended(route('oc.dashboard', absolute: false));
+        }
+
+        // Redirect Applicants (@bah.okay or default) to the Applicant panel
+        return redirect()->intended(route('applicant.dashboard', absolute: false));
     }
 
     /**

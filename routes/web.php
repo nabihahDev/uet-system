@@ -3,6 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UetApplicantController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OcDashboardController;
+use App\Http\Controllers\ApplicantDashboardController;
+use App\Http\Controllers\BafQ140Controller;
 
 Route::get('/', function () {
     return view('welcome');
@@ -35,6 +38,31 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('requests', App\Http\Controllers\BafRequestController::class)->except(['edit','destroy']);
+});
+
+Route::middleware(['auth', 'role:oc'])->prefix('oc')->name('oc.')->group(function () {
+    Route::get('/dashboard', [OcDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/uet/{id}/review', [OcDashboardController::class, 'review'])->name('review');
+    Route::put('/uet/{id}/review', [OcDashboardController::class, 'updateReview'])->name('updateReview');
+});
+
+// OC Routes
+Route::middleware(['auth', 'role:oc'])->prefix('oc')->name('oc.')->group(function () {
+    Route::get('/dashboard', [OcDashboardController::class, 'index'])->name('dashboard');
+});
+
+// Applicant Routes
+Route::middleware(['auth', 'role:applicant'])->prefix('applicant')->name('applicant.')->group(function () {
+    Route::get('/dashboard', [ApplicantDashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Existing UET routes...
+    Route::get('/uet/dashboard', [UetApplicantController::class, 'index'])->name('uet.dashboard');
+    Route::get('/uet/create', [UetApplicantController::class, 'create'])->name('uet.create');
+
+    // Add the missing BAF Q 140 route:
+    Route::get('/bafq140/create', [BafQ140Controller::class, 'create'])->name('bafq140.create');
 });
 
 require __DIR__.'/auth.php';

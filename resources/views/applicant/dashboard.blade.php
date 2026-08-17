@@ -1,10 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-slate-800 leading-tight">
-            {{ __('Papan Pemuka Pemohon') }}
-        </h2>
-    </x-slot>
-
     <div class="py-8 bg-slate-100 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
@@ -19,20 +13,6 @@
                 </div>
             @endif
 
-            <!-- Page Action Header Card -->
-            <div class="bg-white border border-slate-200 rounded-lg p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 class="text-xl font-bold text-slate-900 uppercase tracking-tight">Sistem Jadual Kelengkapan Unit (UET)</h1>
-                    <p class="text-xs text-slate-500 mt-1">Urus dan jejak status permohonan rasmi anda di sini.</p>
-                </div>
-                <div>
-                    <a href="{{ route('uet.create') }}" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-medium px-4 py-2.5 rounded-md text-xs tracking-wide uppercase transition shadow-sm">
-                        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Permohonan Baru
-                    </a>
-                </div>
-            </div>
-
             <!-- Quick Summary Stats Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Total Requests -->
@@ -40,7 +20,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-xs font-semibold uppercase tracking-wider text-slate-500">Jumlah Permohonan</p>
-                            <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ $requests->total() }}</h3>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1">{{ $requests->count() }}</h3>
                         </div>
                         <div class="w-10 h-10 bg-slate-100 rounded border border-slate-200 flex items-center justify-center text-slate-600">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -96,11 +76,9 @@
 
             <!-- MAIN TABLE CARD: Request History -->
             <div class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-800 uppercase tracking-tight">Senarai Permohonan UET</h2>
-                        <p class="text-xs text-slate-500">Rekod rasmi borang permohonan yang telah dibuat.</p>
-                    </div>
+                <div class="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                    <h2 class="text-base font-bold text-slate-800 uppercase tracking-tight">Senarai Permohonan UET & BAF Q 140</h2>
+                    <p class="text-xs text-slate-500">Rekod rasmi borang permohonan yang telah dibuat.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -118,30 +96,21 @@
                         <tbody class="divide-y divide-slate-200 bg-white">
                             @forelse($requests as $request)
                                 <tr class="hover:bg-slate-50/80 transition-colors">
-                                    <!-- Reference Number -->
                                     <td class="py-3.5 px-6 font-semibold text-slate-900 font-mono">
                                         {{ $request->reference_no }}
                                     </td>
-
-                                    <!-- Unit & Department -->
                                     <td class="py-3.5 px-6">
                                         <div class="font-semibold text-slate-800">{{ $request->unit }}</div>
                                         <div class="text-[11px] text-slate-500">{{ $request->daripada }}</div>
                                     </td>
-
-                                    <!-- Request Date -->
                                     <td class="py-3.5 px-6 text-slate-600">
                                         {{ \Carbon\Carbon::parse($request->request_date)->format('d M Y') }}
                                     </td>
-
-                                    <!-- Items Count -->
                                     <td class="py-3.5 px-6 text-center">
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200">
                                             {{ $request->items->count() }} Item
                                         </span>
                                     </td>
-
-                                    <!-- Dynamic Status Badges -->
                                     <td class="py-3.5 px-6">
                                         @switch($request->status)
                                             @case('draft')
@@ -192,8 +161,6 @@
                                                 </span>
                                         @endswitch
                                     </td>
-
-                                    <!-- Action Link -->
                                     <td class="py-3.5 px-6 text-right">
                                         <a href="{{ route('uet.show', $request->id) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded border border-slate-300">
                                             Papar
@@ -202,7 +169,6 @@
                                     </td>
                                 </tr>
                             @empty
-                                <!-- Empty State View -->
                                 <tr>
                                     <td colspan="6" class="py-12 text-center">
                                         <div class="flex flex-col items-center justify-center space-y-3">
@@ -210,10 +176,7 @@
                                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                             </div>
                                             <p class="text-sm font-bold text-slate-700">Tiada Permohonan Dijumpai</p>
-                                            <p class="text-xs text-slate-500 max-w-sm">Anda belum membuat sebarang permohonan UET. Klik butang di bawah untuk memulakan permohonan baru.</p>
-                                            <a href="{{ route('uet.create') }}" class="mt-2 inline-flex items-center gap-1.5 bg-slate-800 hover:bg-slate-900 text-white font-medium text-xs px-4 py-2 rounded transition shadow-sm">
-                                                Buat Permohonan Baru
-                                            </a>
+                                            <p class="text-xs text-slate-500 max-w-sm">Anda belum membuat sebarang permohonan UET atau BAF Q 140.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -221,13 +184,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination Links Footer -->
-                @if($requests->hasPages())
-                    <div class="px-6 py-3 border-t border-slate-200 bg-slate-50">
-                        {{ $requests->links() }}
-                    </div>
-                @endif
             </div>
 
         </div>
