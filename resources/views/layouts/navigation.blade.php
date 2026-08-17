@@ -17,9 +17,9 @@
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('dashboard') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
                         {{ __('Dashboard') }}
                     </a>
-                    <a href="{{ route('requests.index') }}" 
+                    <a href="{{ route('requests.create') }}" 
                        class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('requests.*') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
-                        {{ __('Requests') }}
+                        {{ __('BAF Q 140') }}
                     </a>
                 </div>
             </div>
@@ -75,8 +75,8 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-white">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('requests.index')" :active="request()->routeIs('requests.*')" class="text-white">
-                {{ __('Requests') }}
+            <x-responsive-nav-link :href="route('requests.create')" :active="request()->routeIs('requests.*')" class="text-white">
+                {{ __('BAF Q 140') }}
             </x-responsive-nav-link>
         </div>
 
