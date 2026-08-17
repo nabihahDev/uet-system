@@ -1,4 +1,7 @@
 <x-app-layout>
+    <!-- Include SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
         .baf-form-container {
             max-width: 1100px;
@@ -221,7 +224,7 @@
     </style>
 
     <div class="baf-form-container">
-        <form action="{{ route('requests.update', $requestModel->id ?? 1) }}" method="POST">
+        <form id="baf-form" action="{{ route('requests.update', $requestModel->id ?? 1) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -345,42 +348,42 @@
             <!-- LOWER AUTHORIZATION SECTIONS -->
             <div class="baf-bottom-grid">
                 
-                <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="baf-section-box">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
-                                <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
-                                <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
-                                <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                        </div>
-                    </div>
+               <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
+<div style="display: flex; flex-direction: column; gap: 12px;">
+    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
+                <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+            </div>
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
+                <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+            </div>
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
+                <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+            </div>
+        </div>
+    </div>
 
-                    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}">
-                        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
-                                <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
-                                <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                            <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
-                                <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}">
+        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
+                <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+            </div>
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
+                <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+            </div>
+            <div>
+                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
+                <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- RIGHT COLUMN: REQUESTED BY & AUTHORISED BY -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -450,84 +453,124 @@
     </div>
 
     <script>
-        function autoExpand(element) {
-            element.style.height = 'auto';
-            element.style.height = element.scrollHeight + 'px';
-        }
+    function autoExpand(element) {
+        element.style.height = 'auto';
+        element.style.height = element.scrollHeight + 'px';
+    }
 
-        function addNewRow() {
-            const tbody = document.getElementById('items-tbody');
-            const rowCount = tbody.children.length;
-            const index = rowCount;
+    function addNewRow() {
+        const tbody = document.getElementById('items-tbody');
+        const rowCount = tbody.children.length;
+        const index = rowCount;
 
-            const newRow = document.createElement('tr');
-            newRow.className = 'item-row';
-            newRow.innerHTML = `
-                <td class="row-index" style="font-weight: 600; color: #6b7280;">${rowCount + 1}</td>
-                <td><textarea name="items[${index}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
-                <td><textarea name="items[${index}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
-                <td><textarea name="items[${index}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td><textarea name="items[${index}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-                <td>
-                    <textarea name="items[${index}][reason]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea>
-                    <button type="button" class="baf-btn-floating-remove" onclick="removeRow(this)" title="Delete Row">✕</button>
-                </td>
-            `;
+        const newRow = document.createElement('tr');
+        newRow.className = 'item-row';
+        newRow.innerHTML = `
+            <td class="row-index" style="font-weight: 600; color: #6b7280;">${rowCount + 1}</td>
+            <td><textarea name="items[${index}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
+            <td><textarea name="items[${index}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
+            <td><textarea name="items[${index}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td>
+                <textarea name="items[${index}][reason]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea>
+                <button type="button" class="baf-btn-floating-remove" onclick="removeRow(this)" title="Delete Row">✕</button>
+            </td>
+        `;
 
-            tbody.appendChild(newRow);
+        tbody.appendChild(newRow);
+        calculateTotal();
+    }
+
+    function removeRow(button) {
+        const tbody = document.getElementById('items-tbody');
+        if (tbody.children.length > 1) {
+            button.closest('tr').remove();
+            reindexRows();
             calculateTotal();
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Perhatian',
+                text: 'Borang memerlukan sekurang-kurangnya satu baris item.',
+                confirmButtonColor: '#0f172a'
+            });
         }
+    }
 
-        function removeRow(button) {
-            const tbody = document.getElementById('items-tbody');
-            if (tbody.children.length > 1) {
-                button.closest('tr').remove();
-                reindexRows();
-                calculateTotal();
-            } else {
-                alert('Form requires at least one item row.');
-            }
-        }
+    function reindexRows() {
+        const rows = document.querySelectorAll('#items-tbody .item-row');
+        rows.forEach((row, i) => {
+            row.querySelector('.row-index').textContent = i + 1;
+            row.querySelectorAll('textarea').forEach(input => {
+                const name = input.getAttribute('name');
+                if (name) {
+                    input.setAttribute('name', name.replace(/items\[\d+\]/, `items[${i}]`));
+                }
+            });
+        });
+    }
 
-        function reindexRows() {
-            const rows = document.querySelectorAll('#items-tbody .item-row');
-            rows.forEach((row, i) => {
-                row.querySelector('.row-index').textContent = i + 1;
-                row.querySelectorAll('textarea').forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name) {
-                        input.setAttribute('name', name.replace(/items\[\d+\]/, `items[${i}]`));
+    function calculateTotal() {
+        let total = 0;
+        const rows = document.querySelectorAll('#items-tbody .item-row');
+        rows.forEach(row => {
+            const qtyVal = row.querySelector('.item-qty').value.replace(/[^0-9.-]+/g, "");
+            const costVal = row.querySelector('.item-cost').value.replace(/[^0-9.-]+/g, "");
+            
+            const qty = parseFloat(qtyVal) || 0;
+            const cost = parseFloat(costVal) || 0;
+            
+            total += (qty * cost);
+        });
+
+        document.getElementById('total-cost-display').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.baf-textarea').forEach(el => autoExpand(el));
+        calculateTotal();
+
+        const bafForm = document.getElementById('baf-form');
+
+        if (bafForm) {
+            bafForm.addEventListener('submit', function (e) {
+                const submitter = e.submitter;
+                
+                // Teruskan terus jika butang "Return Request" ditekan
+                if (submitter && submitter.name === 'oc_endorse' && submitter.value === '0') {
+                    return;
+                }
+
+                // Hentikan penghantaran borang sementara menunggu respons SweetAlert2
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Pengesahan Borang JKU',
+                    text: 'Adakah awda sudah mengisi borang JKU?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#0f172a',
+                    cancelButtonColor: '#dc2626',
+                    confirmButtonText: 'Ya, Sudah',
+                    cancelButtonText: 'Belum (Isi Borang JKU)',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Hantar borang jika memilih "Ya, Sudah"
+                        bafForm.submit();
+                    } else if (result.dismiss === Swal.DismissReason.cancel) {
+                        // HALUAN SEMULA DALAM TAB YANG SAMA (tanpa tab baharu)
+                        window.location.href = "{{ route('uet.create') }}";
                     }
                 });
             });
         }
-
-        function calculateTotal() {
-            let total = 0;
-            const rows = document.querySelectorAll('#items-tbody .item-row');
-            rows.forEach(row => {
-                const qtyVal = row.querySelector('.item-qty').value.replace(/[^0-9.-]+/g, "");
-                const costVal = row.querySelector('.item-cost').value.replace(/[^0-9.-]+/g, "");
-                
-                const qty = parseFloat(qtyVal) || 0;
-                const cost = parseFloat(costVal) || 0;
-                
-                // If cost is unit price, multiply by qty. If cost is line total, use `total += cost;`
-                total += (qty * cost);
-            });
-
-            document.getElementById('total-cost-display').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.baf-textarea').forEach(el => autoExpand(el));
-            calculateTotal();
-        });
-    </script>
+    });
+</script>
 </x-app-layout>

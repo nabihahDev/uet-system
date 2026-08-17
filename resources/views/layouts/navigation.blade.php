@@ -6,8 +6,7 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}" class="flex items-center gap-2 font-bold text-lg text-white">
-                        <x-application-logo class="block h-8 w-auto fill-current text-blue-400" />
-                        <span>UET SYSTEM</span>
+                        <span>JKU SYSTEM</span>
                     </a>
                 </div>
 
