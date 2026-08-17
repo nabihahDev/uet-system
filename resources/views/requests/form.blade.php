@@ -2,215 +2,222 @@
     <style>
         .baf-form-container {
             max-width: 1100px;
-            margin: 20px auto;
+            margin: 24px auto;
             background: #ffffff;
-            padding: 24px;
-            border: 1px solid #111827;
-            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-            color: #111827;
+            padding: 32px;
+            border: 1px solid #000000;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #000000;
             font-size: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
+        
         .baf-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            border-bottom: 2px solid #111827;
+            border-bottom: 1px solid #000000;
             padding-bottom: 12px;
             margin-bottom: 16px;
         }
+
         .baf-title-box {
-            border: 1.5px solid #111827;
+            border: 1px solid #000000;
             font-weight: 700;
-            padding: 6px 12px;
+            padding: 6px 14px;
             display: inline-block;
-            font-size: 16px;
-            background-color: #f9fafb;
+            font-size: 15px;
+            letter-spacing: 0.025em;
+            background-color: #ffffff;
+            color: #000000;
         }
+
+        /* Sharp Grid Cards */
         .baf-grid-4 {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            border: 1px solid #111827;
-            padding: 8px;
-            background: #f9fafb;
+            gap: 0;
+            border: 1px solid #000000;
+            background: #ffffff;
             margin-bottom: 16px;
             text-align: center;
         }
+        
         .baf-grid-cell {
-            border-right: 1px solid #d1d5db;
-            padding: 0 4px;
+            border-right: 1px solid #000000;
+            padding: 8px;
         }
+        
         .baf-grid-cell:last-child {
             border-right: none;
         }
+
+        /* Sharp Border Inputs */
         .baf-input {
             width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
-            padding: 4px 6px;
-            font-size: 11px;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            padding: 5px 8px;
+            font-size: 12px;
             box-sizing: border-box;
             background-color: #ffffff;
+            color: #000000;
         }
+        
+        .baf-input:focus, .baf-textarea:focus {
+            outline: 1px solid #000000;
+        }
+        
         .baf-input:read-only, .baf-textarea:read-only {
-            background-color: #e5e7eb;
-            color: #6b7280;
-            cursor: not-allowed;
+            background-color: #f3f4f6;
+            color: #374151;
         }
 
-        /* Dynamic Auto-Expanding Textarea Styling */
         .baf-textarea {
             width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 4px;
+            border: 1px solid #000000;
+            border-radius: 0px;
             padding: 4px 6px;
             font-size: 11px;
             box-sizing: border-box;
             background-color: #ffffff;
+            color: #000000;
             font-family: inherit;
             resize: none;
-            min-height: 26px;
+            min-height: 28px;
             overflow-y: hidden;
             display: block;
         }
 
+        /* Formal Table Styling */
         .baf-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 11px;
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
+            border: 1px solid #000000;
         }
+        
         .baf-table th, .baf-table td {
-            border: 1px solid #111827;
-            padding: 4px;
-            vertical-align: top;
+            border: 1px solid #000000;
+            padding: 6px 4px;
+            vertical-align: middle;
+            position: relative;
         }
+        
         .baf-table th {
-            background-color: #f3f4f6;
+            background-color: #e5e7eb;
+            color: #000000;
             font-weight: 700;
+            text-transform: uppercase;
+            font-size: 10px;
         }
 
         .baf-table-wrapper {
             position: relative;
             overflow-x: auto;
-            padding-right: 32px;
         }
 
-        .baf-table tr {
-            position: relative;
+        /* Add Row Container & Action Buttons */
+        .baf-add-btn-container {
+            margin-bottom: 16px;
+        }
+
+        .baf-btn-add {
+            background-color: #0f172a;
+            color: #ffffff;
+            border: 1px solid #0f172a;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 3px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .baf-btn-add:hover {
+            background-color: #1e293b;
         }
 
         .baf-btn-floating-remove {
             position: absolute;
-            right: -28px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: #ef4444;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
             color: #ffffff;
             border: none;
-            border-radius: 4px;
-            width: 22px;
-            height: 22px;
-            font-size: 11px;
-            font-weight: bold;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            line-height: 1;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
         }
 
-        .baf-btn-floating-remove:hover {
-            background-color: #dc2626;
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        .baf-add-btn-container {
-            display: flex;
-            justify-content: flex-end;
-            margin-top: -10px;
-            margin-bottom: 14px;
-        }
-
-        .baf-btn-add {
-            background-color: #007FFF;
-            color: #ffffff;
-            border: none;
-            padding: 5px 14px;
-            font-size: 11px;
+        .baf-btn {
+            padding: 8px 16px;
+            font-size: 12px;
             font-weight: 600;
-            border-radius: 4px;
+            border-radius: 3px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: background-color 0.2s ease;
+            border: 1px solid transparent;
         }
 
-        .baf-btn-add:hover {
-            background-color: #0066CC;
-        }
+        .baf-btn-primary { background-color: #0f172a; color: #ffffff; }
+        .baf-btn-primary:hover { background-color: #1e293b; }
+        
+        .baf-btn-success { background-color: #16a34a; color: #ffffff; }
+        .baf-btn-success:hover { background-color: #15803d; }
+        
+        .baf-btn-danger { background-color: #dc2626; color: #ffffff; }
+        .baf-btn-danger:hover { background-color: #b91c1c; }
 
         .baf-picking-box {
             display: grid;
             grid-template-columns: 3fr 1fr;
-            border: 1px solid #111827;
+            border: 1px solid #000000;
             margin-bottom: 16px;
         }
+        
         .baf-picking-left {
-            padding: 8px;
-            border-right: 1px solid #111827;
+            padding: 10px;
+            border-right: 1px solid #000000;
         }
+        
         .baf-picking-right {
-            padding: 8px;
-            background: #f9fafb;
+            padding: 10px;
+            background: #ffffff;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
+
+        /* Lower Authorization Layout Fix */
         .baf-bottom-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        .baf-section-box {
-            border: 1px solid #111827;
-            padding: 10px;
-        }
-        .baf-sub-box {
-            border: 1px solid #d1d5db;
-            padding: 8px;
-            margin-top: 8px;
-            border-radius: 4px;
-        }
-        .baf-sub-box.active-review {
-            border-color: #0066CC;
-            background-color: #f5f3ff;
-        }
-        .baf-btn {
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            color: #ffffff;
-            font-size: 12px;
-        }
-        
-        .baf-btn-primary { 
-            background-color: #007FFF; 
-            transition: background-color 0.2s ease;
+            gap: 12px;
+            margin-bottom: 16px;
         }
 
-        .baf-btn-primary:hover { 
-            background-color: #0066CC; 
+        .baf-section-box {
+            border: 1px solid #000000;
+            border-radius: 0px;
+            padding: 10px;
+            background-color: #ffffff;
         }
-        .baf-btn-success { background-color: #16a34a; }
-        .baf-btn-danger { background-color: #dc2626; }
+
+        .baf-section-box.active-review {
+            border: 1px dashed #000000;
+            background-color: #ffffff;
+            box-shadow: none;
+        }
     </style>
 
     <div class="baf-form-container">
@@ -222,12 +229,12 @@
             <div class="baf-header">
                 <div>
                     <div class="baf-title-box">REQUISITION FORM</div>
-                    <div style="margin-top: 10px; display: flex; gap: 16px; align-items: center;">
-                        <span style="font-weight: bold;">Indicate Requisition Type:</span>
+                    <div style="margin-top: 12px; display: flex; gap: 16px; align-items: center; color: #374151;">
+                        <span style="font-weight: 600;">Indicate Requisition Type:</span>
                         @php $type = old('req_type', $requestModel->req_type ?? 'stock'); @endphp
-                        <label><input type="radio" name="req_type" value="stock" {{ $type == 'stock' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> STOCK (Catalogued Items)</label>
-                        <label><input type="radio" name="req_type" value="services" {{ $type == 'services' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> SERVICES (Non-Catalogued Items)</label>
-                        <label><input type="radio" name="req_type" value="return" {{ $type == 'return' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> RETURN TO STORE (Credits)</label>
+                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="stock" {{ $type == 'stock' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> STOCK (Catalogued Items)</label>
+                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="services" {{ $type == 'services' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> SERVICES (Non-Catalogued Items)</label>
+                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="return" {{ $type == 'return' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> RETURN TO STORE (Credits)</label>
 
                         @if(!$canEditRequester)
                             <input type="hidden" name="req_type" value="{{ $type }}">
@@ -235,10 +242,10 @@
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-weight: bold; font-size: 13px;">BAF Q 140</div>
-                    <div style="margin-top: 6px;">
+                    <div style="font-weight: 700; font-size: 14px; color: #111827;">BAF Q 140</div>
+                    <div style="margin-top: 6px; color: #374151;">
                         <strong>REQ. NO:</strong> 
-                        <span style="border-bottom: 1px solid #111827; padding: 2px 8px; font-family: monospace;">{{ $requestModel->req_no ?? '' }}</span>
+                        <span style="border-bottom: 1.5px solid #374151; padding: 2px 8px; font-family: monospace; font-weight: 600;">{{ $requestModel->req_no ?? '' }}</span>
                     </div>
                 </div>
             </div>
@@ -246,19 +253,19 @@
             <!-- TOP FIELD METRICS -->
             <div class="baf-grid-4">
                 <div class="baf-grid-cell">
-                    <label style="font-weight: bold; display: block;">UNIT CODE</label>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">UNIT CODE</label>
                     <input type="text" name="unit_code" value="{{ old('unit_code', $requestModel->unit_code ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
                 </div>
                 <div class="baf-grid-cell">
-                    <label style="font-weight: bold; display: block;">REQUIRED BY DATE</label>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">REQUIRED BY DATE</label>
                     <input type="text" name="required_by" placeholder="DD / MM / YYYY" value="{{ old('required_by', $requestModel->required_by ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
                 </div>
                 <div class="baf-grid-cell">
-                    <label style="font-weight: bold; display: block;">PRIORITY (1, 2, 3 OR 4)</label>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PRIORITY (1, 2, 3 OR 4)</label>
                     <input type="text" name="priority" value="{{ old('priority', $requestModel->priority ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
                 </div>
                 <div class="baf-grid-cell">
-                    <label style="font-weight: bold; display: block;">PART ISSUE (Y/N)</label>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PART ISSUE (Y/N)</label>
                     <input type="text" name="part_issue" value="{{ old('part_issue', $requestModel->part_issue ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
                 </div>
             </div>
@@ -286,7 +293,7 @@
                         @php $items = old('items', $requestModel->items ?? [[]]); @endphp
                         @foreach($items as $index => $item)
                         <tr class="item-row">
-                            <td class="row-index">{{ $loop->iteration }}</td>
+                            <td class="row-index" style="font-weight: 600; color: #6b7280;">{{ $loop->iteration }}</td>
                             <td><textarea name="items[{{ $index }}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['qty'] ?? '' }}</textarea></td>
                             <td><textarea name="items[{{ $index }}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['uom'] ?? '' }}</textarea></td>
                             <td><textarea name="items[{{ $index }}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['req_type'] ?? '' }}</textarea></td>
@@ -321,54 +328,54 @@
             <!-- PICKING SLIP BLOCK -->
             <div class="baf-picking-box">
                 <div class="baf-picking-left">
-                    <strong>PICKING SLIP/DELIVERY INSTRUCTIONS</strong>
-                    <div style="margin-top: 4px;">
+                    <strong style="color: #374151;">PICKING SLIP/DELIVERY INSTRUCTIONS</strong>
+                    <div style="margin-top: 6px;">
                         <input type="text" name="delivery_contact" placeholder="Contact TELP / POC upon receiving items" value="{{ old('delivery_contact', $requestModel->delivery_contact ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
                     </div>
-                    <div style="margin-top: 4px;">
+                    <div style="margin-top: 6px;">
                         <input type="text" name="delivery_instructions" placeholder="Delivery office/location instructions" value="{{ old('delivery_instructions', $requestModel->delivery_instructions ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
                     </div>
                 </div>
                 <div class="baf-picking-right">
-                    <strong>TOTAL EST. COST B$</strong>
-                    <div style="font-size: 15px; font-weight: bold; margin-top: 4px;" id="total-cost-display">$0.00</div>
+                    <strong style="color: #4b5563; font-size: 11px;">TOTAL EST. COST B$</strong>
+                    <div style="font-size: 18px; font-weight: 700; color: #111827; margin-top: 2px;" id="total-cost-display">$0.00</div>
                 </div>
             </div>
 
             <!-- LOWER AUTHORIZATION SECTIONS -->
-            <div class="baf-bottom-grid" style="align-items: start;">
+            <div class="baf-bottom-grid">
                 
                 <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="baf-section-box" style="padding: 8px;">
+                    <div class="baf-section-box">
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EQUIPMENT NO.</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
                                 <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">WORK ORDER NO.</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
                                 <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE SUB HEAD</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
                                 <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                         </div>
                     </div>
 
-                    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}" style="padding: 8px;">
+                    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}">
                         <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
                                 <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
                                 <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
                                 <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
                             </div>
                         </div>
@@ -377,43 +384,43 @@
 
                 <!-- RIGHT COLUMN: REQUESTED BY & AUTHORISED BY -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}" style="padding: 8px;">
+                    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}">
                         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED BY<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
                                 <input type="text" name="req_title" value="{{ old('req_title', $requestModel->req_title ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EMPLOYEE CODE</label>
                                 <input type="text" name="req_code" value="{{ old('req_code', $requestModel->req_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
                                 <input type="text" name="req_signature" value="{{ old('req_signature', $requestModel->req_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">REQUESTED DATE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED DATE</label>
                                 <input type="text" name="req_date" placeholder="DD / MM / YYYY" value="{{ old('req_date', $requestModel->req_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
                             </div>
                         </div>
                     </div>
 
-                    <div class="baf-section-box {{ $canEditAuthoriser ? 'active-review' : '' }}" style="padding: 8px;">
+                    <div class="baf-section-box {{ $canEditAuthoriser ? 'active-review' : '' }}">
                         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">AUTHORISED BY<br><span style="font-weight: normal; font-size: 9px;">(Appointment Title)</span></label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">AUTHORISED BY<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
                                 <input type="text" name="auth_title" value="{{ old('auth_title', $requestModel->auth_title ?? '') }}" class="baf-input" {{ $canEditAuthoriser ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">EMPLOYEE CODE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EMPLOYEE CODE</label>
                                 <input type="text" name="auth_code" value="{{ old('auth_code', $requestModel->auth_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">SIGNATURE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
                                 <input type="text" name="auth_signature" value="{{ old('auth_signature', $requestModel->auth_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
                             </div>
                             <div>
-                                <label style="font-weight: bold; display: block; font-size: 10px; margin-bottom: 4px;">DATE</label>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
                                 <input type="text" name="auth_date" placeholder="DD / MM / YYYY" value="{{ old('auth_date', $requestModel->auth_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
                             </div>
                         </div>
@@ -423,15 +430,15 @@
             </div>
 
             <!-- FOOTER LABELS & ACTION BUTTONS -->
-            <div style="margin-top: 16px; font-size: 10px; color: #6b7280; display: flex; justify-content: space-between; align-items: flex-end;">
-                <div>
+            <div style="margin-top: 20px; font-size: 11px; color: #6b7280; display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="line-height: 1.5;">
                     <div>• Vote Controller Signature is only required for "SERVICES" Requisition</div>
                     <div>• Req. Type-Enter either "S" to indicate a Store Issue or a "P" to indicate a Direct Purchase</div>
                     <div>• Upon Authorisation forward 'Requisition' to Support Cell for Input to DEFLIS</div>
                 </div>
             </div>
 
-            <div style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                 @if($canEditRequester)
                     <button type="submit" class="baf-btn baf-btn-primary">Save & Submit Request</button>
                 @elseif($canEditAuthoriser)
@@ -456,7 +463,7 @@
             const newRow = document.createElement('tr');
             newRow.className = 'item-row';
             newRow.innerHTML = `
-                <td class="row-index">${rowCount + 1}</td>
+                <td class="row-index" style="font-weight: 600; color: #6b7280;">${rowCount + 1}</td>
                 <td><textarea name="items[${index}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
                 <td><textarea name="items[${index}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
                 <td><textarea name="items[${index}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)"></textarea></td>
@@ -510,6 +517,8 @@
                 
                 const qty = parseFloat(qtyVal) || 0;
                 const cost = parseFloat(costVal) || 0;
+                
+                // If cost is unit price, multiply by qty. If cost is line total, use `total += cost;`
                 total += (qty * cost);
             });
 
