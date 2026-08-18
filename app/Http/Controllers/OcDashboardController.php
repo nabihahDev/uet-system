@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\UetRequest;
@@ -9,7 +10,8 @@ class OcDashboardController extends Controller
     // Dashboard View
     public function index()
     {
-        $pendingReviews = UetRequest::where('status', 'pending_oc')->latest()->get();
+        // Diselaraskan mengikut status yang dihantar oleh Applicant
+        $pendingReviews = UetRequest::where('status', 'pending_oc_approval')->latest()->get();
         $approvedCount = UetRequest::where('status', 'pending_qm')->count();
         $completedCount = UetRequest::where('status', 'completed')->count();
 
@@ -20,7 +22,7 @@ class OcDashboardController extends Controller
     public function review($id)
     {
         $uet = UetRequest::with('items')->findOrFail($id);
-        return view('applicant.create', compact('uet')); // Reuses your Blade form in OC mode
+        return view('applicant.create', compact('uet'));
     }
 
     // Save OC Review, Signature, & Ulasan
@@ -35,11 +37,15 @@ class OcDashboardController extends Controller
             'nama_setiausaha' => 'required|string',
         ]);
 
-        // Update items (Column j: Ulasan Timb Peg Turus)
-        foreach ($request->items as $itemId => $itemData) {
-            $uet->items()->where('id', $itemId)->update([
-                'ulasan_timb_peg_turus' => $itemData['ulasan_timb_peg_turus']
-            ]);
+        // Update items (Column: Ulasan Timb Peg Turus)
+        if ($request->has('items')) {
+            foreach ($request->items as $itemId => $itemData) {
+                if (isset($itemData['ulasan_timb_peg_turus'])) {
+                    $uet->items()->where('id', $itemId)->update([
+                        'ulasan_timb_peg_turus' => $itemData['ulasan_timb_peg_turus']
+                    ]);
+                }
+            }
         }
 
         // Update OC main form fields & advance status
@@ -49,10 +55,10 @@ class OcDashboardController extends Controller
             'bilangan_diluluskan' => $request->bilangan_diluluskan,
             'bilangan_tidak_diluluskan' => $request->bilangan_tidak_diluluskan,
             'nama_setiausaha' => $request->nama_setiausaha,
-            'status' => 'pending_qm', // Moves task to Quartermaster / JKU
+            'status' => 'pending_qm',
             'reviewed_at_oc' => now(),
         ]);
 
-        return redirect()->route('oc.dashboard')->with('success', 'UET application reviewed and forwarded to JKU.');
+        return redirect()->route('oc.dashboard')->with('success', 'Permohonan UET berjaya disemak dan dihantar ke JKU.');
     }
 }

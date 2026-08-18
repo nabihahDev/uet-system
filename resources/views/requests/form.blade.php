@@ -73,6 +73,8 @@
         .baf-input:read-only, .baf-textarea:read-only {
             background-color: #f3f4f6;
             color: #374151;
+            pointer-events: none; /* Menghalang klik & garis fokus biru */
+            user-select: none;     /* Menghalang teks daripada di-highlight */
         }
 
         .baf-textarea {
@@ -235,9 +237,35 @@
                     <div style="margin-top: 12px; display: flex; gap: 16px; align-items: center; color: #374151;">
                         <span style="font-weight: 600;">Indicate Requisition Type:</span>
                         @php $type = old('req_type', $requestModel->req_type ?? 'stock'); @endphp
-                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="stock" {{ $type == 'stock' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> STOCK (Catalogued Items)</label>
-                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="services" {{ $type == 'services' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> SERVICES (Non-Catalogued Items)</label>
-                        <label style="cursor: pointer;"><input type="radio" name="req_type" value="return" {{ $type == 'return' ? 'checked' : '' }} {{ $canEditRequester ? '' : 'disabled' }}> RETURN TO STORE (Credits)</label>
+                        <!-- STOCK -->
+<label class="inline-flex items-center gap-1 cursor-pointer">
+    <input type="radio" 
+           name="requisition_type" 
+           value="stock" 
+           {{ old('requisition_type', $requestModel->requisition_type ?? '') === 'stock' ? 'checked' : '' }} 
+           required>
+    <span>STOCK (Catalogued Items)</span>
+</label>
+
+<!-- SERVICES -->
+<label class="inline-flex items-center gap-1 cursor-pointer">
+    <input type="radio" 
+           name="requisition_type" 
+           value="services" 
+           {{ old('requisition_type', $requestModel->requisition_type ?? '') === 'services' ? 'checked' : '' }} 
+           required>
+    <span>SERVICES (Non-Catalogued Items)</span>
+</label>
+
+<!-- RETURN TO STORE -->
+<label class="inline-flex items-center gap-1 cursor-pointer">
+    <input type="radio" 
+           name="requisition_type" 
+           value="return_to_store" 
+           {{ old('requisition_type', $requestModel->requisition_type ?? '') === 'return_to_store' ? 'checked' : '' }} 
+           required>
+    <span>RETURN TO STORE (Credits)</span>
+</label>
 
                         @if(!$canEditRequester)
                             <input type="hidden" name="req_type" value="{{ $type }}">
@@ -256,20 +284,20 @@
             <!-- TOP FIELD METRICS -->
             <div class="baf-grid-4">
                 <div class="baf-grid-cell">
-                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">UNIT CODE</label>
-                    <input type="text" name="unit_code" value="{{ old('unit_code', $requestModel->unit_code ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">UNIT CODE *</label>
+                    <input type="text" name="unit_code" value="{{ old('unit_code', $requestModel->unit_code ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }} required>
                 </div>
                 <div class="baf-grid-cell">
-                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">REQUIRED BY DATE</label>
-                    <input type="text" name="required_by" placeholder="DD / MM / YYYY" value="{{ old('required_by', $requestModel->required_by ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
+                    <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">REQUIRED BY DATE *</label>
+                    <input type="date" name="required_by" value="{{ old('required_by', $requestModel->required_by ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }} required>
                 </div>
                 <div class="baf-grid-cell">
                     <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PRIORITY (1, 2, 3 OR 4)</label>
-                    <input type="text" name="priority" value="{{ old('priority', $requestModel->priority ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
+                    <input type="text" name="priority" value="{{ old('priority', $requestModel->priority ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }} required>
                 </div>
                 <div class="baf-grid-cell">
                     <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PART ISSUE (Y/N)</label>
-                    <input type="text" name="part_issue" value="{{ old('part_issue', $requestModel->part_issue ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }}>
+                    <input type="text" name="part_issue" value="{{ old('part_issue', $requestModel->part_issue ?? '') }}" class="baf-input" style="text-align: center;" {{ $canEditRequester ? '' : 'readonly' }} required>
                 </div>
             </div>
 
@@ -285,7 +313,7 @@
                             <th style="width: 80px;">Stock Code</th>
                             <th style="width: 100px;">Suggested Mfr/Supplier</th>
                             <th style="width: 100px;">Part No</th>
-                            <th>Description</th>
+                            <th>Description *</th>
                             <th style="width: 80px;">Est. Cost B$</th>
                             <th style="width: 80px;">IPC Ref</th>
                             <th style="width: 100px;">Equip Used On</th>
@@ -297,16 +325,16 @@
                         @foreach($items as $index => $item)
                         <tr class="item-row">
                             <td class="row-index" style="font-weight: 600; color: #6b7280;">{{ $loop->iteration }}</td>
-                            <td><textarea name="items[{{ $index }}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['qty'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['uom'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['req_type'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['stock_code'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['manufacturer'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['part_number'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['description'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['est_cost'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['ipc_ref'] ?? '' }}</textarea></td>
-                            <td><textarea name="items[{{ $index }}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['equip_used_on'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][qty]" class="baf-textarea item-qty" style="text-align: center;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['qty'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][uom]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['uom'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][req_type]" class="baf-textarea" style="text-align: center;" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['req_type'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['stock_code'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['manufacturer'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['part_number'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][description]" class="baf-textarea item-desc" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} {{ $index === 0 && $canEditRequester ? 'required' : '' }}>{{ $item['description'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['est_cost'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['ipc_ref'] ?? '' }}</textarea></td>
+                            <td><textarea name="items[{{ $index }}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }} required>{{ $item['equip_used_on'] ?? '' }}</textarea></td>
                             <td>
                                 <textarea name="items[{{ $index }}][reason]" class="baf-textarea" rows="1" oninput="autoExpand(this)" {{ $canEditRequester ? '' : 'readonly' }}>{{ $item['reason'] ?? '' }}</textarea>
                                 @if($canEditRequester)
@@ -348,42 +376,42 @@
             <!-- LOWER AUTHORIZATION SECTIONS -->
             <div class="baf-bottom-grid">
                 
-               <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
-<div style="display: flex; flex-direction: column; gap: 12px;">
-    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}">
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
-                <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
-            </div>
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
-                <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
-            </div>
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
-                <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
-            </div>
-        </div>
-    </div>
+                <!-- LEFT COLUMN: TECHNICAL & VOTE CONTROLLER -->
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <div class="baf-section-box {{ $canEditRequester ? 'active-review' : '' }}">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
+                                <input type="text" name="equipment_no" value="{{ old('equipment_no', $requestModel->equipment_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }} required>
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
+                                <input type="text" name="work_order_no" value="{{ old('work_order_no', $requestModel->work_order_no ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }} required>
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
+                                <input type="text" name="vote_sub_head" value="{{ old('vote_sub_head', $requestModel->vote_sub_head ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }} required>
+                            </div>
+                        </div>
+                    </div>
 
-    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}">
-        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
-                <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
-            </div>
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
-                <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-            </div>
-            <div>
-                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
-                <input type="text" name="vote_date" placeholder="DD / MM / YYYY" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
-            </div>
-        </div>
-    </div>
-</div>
+                    <div class="baf-section-box {{ $canEditVoteController ? 'active-review' : '' }}">
+                        <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
+                                <input type="text" name="vote_title" value="{{ old('vote_title', $requestModel->vote_title ?? '') }}" class="baf-input" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
+                                <input type="text" name="vote_signature" value="{{ old('vote_signature', $requestModel->vote_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                            <div>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
+                                <input type="date" name="vote_date" value="{{ old('vote_date', $requestModel->vote_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditVoteController ? '' : 'readonly' }}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- RIGHT COLUMN: REQUESTED BY & AUTHORISED BY -->
                 <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -391,19 +419,19 @@
                         <div style="display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap: 8px; text-align: center;">
                             <div>
                                 <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED BY<br><span style="font-weight: normal; font-size: 9px; color: #6b7280;">(Appointment Title)</span></label>
-                                <input type="text" name="req_title" value="{{ old('req_title', $requestModel->req_title ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }}>
+                                <input type="text" name="req_title" value="{{ old('req_title', $requestModel->req_title ?? '') }}" class="baf-input" {{ $canEditRequester ? '' : 'readonly' }} required>
                             </div>
                             <div>
                                 <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EMPLOYEE CODE</label>
-                                <input type="text" name="req_code" value="{{ old('req_code', $requestModel->req_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                                <input type="text" name="req_code" value="{{ old('req_code', $requestModel->req_code ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }} required>
                             </div>
                             <div>
                                 <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE</label>
-                                <input type="text" name="req_signature" value="{{ old('req_signature', $requestModel->req_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                                <input type="text" name="req_signature" value="{{ old('req_signature', $requestModel->req_signature ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }} required>
                             </div>
                             <div>
-                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED DATE</label>
-                                <input type="text" name="req_date" placeholder="DD / MM / YYYY" value="{{ old('req_date', $requestModel->req_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                                <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED DATE *</label>
+                                <input type="date" name="req_date" value="{{ old('req_date', $requestModel->req_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }} required>
                             </div>
                         </div>
                     </div>
@@ -424,7 +452,7 @@
                             </div>
                             <div>
                                 <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
-                                <input type="text" name="auth_date" placeholder="DD / MM / YYYY" value="{{ old('auth_date', $requestModel->auth_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
+                                <input type="date" name="auth_date" value="{{ old('auth_date', $requestModel->auth_date ?? '') }}" class="baf-input" style="margin-top: 13px;" {{ $canEditAuthoriser ? '' : 'readonly' }}>
                             </div>
                         </div>
                     </div>
@@ -473,7 +501,7 @@
             <td><textarea name="items[${index}][stock_code]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
             <td><textarea name="items[${index}][manufacturer]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
             <td><textarea name="items[${index}][part_number]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
-            <td><textarea name="items[${index}][description]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
+            <td><textarea name="items[${index}][description]" class="baf-textarea item-desc" rows="1" oninput="autoExpand(this)"></textarea></td>
             <td><textarea name="items[${index}][est_cost]" class="baf-textarea item-cost" style="text-align: right;" rows="1" oninput="autoExpand(this); calculateTotal();"></textarea></td>
             <td><textarea name="items[${index}][ipc_ref]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
             <td><textarea name="items[${index}][equip_used_on]" class="baf-textarea" rows="1" oninput="autoExpand(this)"></textarea></td>
@@ -547,9 +575,27 @@
                     return;
                 }
 
-                // Hentikan penghantaran borang sementara menunggu respons SweetAlert2
                 e.preventDefault();
 
+                // 1. Semak jika medan required (Unit Code, Required By Date, etc) belum diisi
+                if (!bafForm.checkValidity()) {
+                    bafForm.reportValidity();
+                    return;
+                }
+
+                // 2. Semak jika perihalan item pertama kosong
+                const firstItemDesc = document.querySelector('textarea[name="items[0][description]"]');
+                if (firstItemDesc && firstItemDesc.value.trim() === '') {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Borang Belum Lengkap',
+                        text: 'Sila isi sekurang-kurangnya perihalan (Description) bagi item pertama.',
+                        confirmButtonColor: '#0f172a'
+                    });
+                    return;
+                }
+
+                // 3. Pop-up Pengesahan SweetAlert2
                 Swal.fire({
                     title: 'Pengesahan Borang JKU',
                     text: 'Adakah awda sudah mengisi borang JKU?',
@@ -562,10 +608,8 @@
                     reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Hantar borang jika memilih "Ya, Sudah"
                         bafForm.submit();
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        // HALUAN SEMULA DALAM TAB YANG SAMA (tanpa tab baharu)
                         window.location.href = "{{ route('uet.create') }}";
                     }
                 });

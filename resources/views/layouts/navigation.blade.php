@@ -11,23 +11,32 @@
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-6 sm:-my-px sm:ms-10 sm:flex">
-                    <a href="{{ route('dashboard') }}" 
-                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('dashboard') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
-                        {{ __('Dashboard') }}
-                    </a>
-                    
-                    <!-- Added UET Link -->
-                    <a href="{{ route('uet.create') }}" 
-                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('uet.*') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
-                        {{ __('UET') }}
-                    </a>
+<div class="hidden space-x-6 sm:-my-px sm:ms-10 sm:flex">
+    <!-- Dynamic Dashboard Link according to Role -->
+    @if(Auth::user()->role === 'oc')
+        <a href="{{ route('oc.dashboard') }}" 
+           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('oc.dashboard') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
+            {{ __('Dashboard') }}
+        </a>
+    @else
+        <a href="{{ route('uet.dashboard') }}" 
+           class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('uet.dashboard') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
+            {{ __('Dashboard') }}
+        </a>
+    @endif
+    
+    <!-- UET Create Link -->
+    <a href="{{ route('uet.create') }}" 
+       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('uet.create') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
+        {{ __('UET') }}
+    </a>
 
-                    <a href="{{ route('requests.create') }}" 
-                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('requests.*') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
-                        {{ __('BAF Q 140') }}
-                    </a>
-                </div>
+    <!-- BAF Q 140 Link -->
+    <a href="{{ route('requests.create') }}" 
+       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('requests.*') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
+        {{ __('BAF Q 140') }}
+    </a>
+</div>
             </div>
 
             <!-- Settings Dropdown -->
@@ -78,12 +87,12 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-[#151f32]">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-white">
+            <x-responsive-nav-link :href="route('uet.dashboard')" :active="request()->routeIs('uet.dashboard')" class="text-white">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             
             <!-- Added Mobile UET Link -->
-            <x-responsive-nav-link :href="route('uet.create')" :active="request()->routeIs('uet.*')" class="text-white">
+            <x-responsive-nav-link :href="route('uet.create')" :active="request()->routeIs('uet.create')" class="text-white">
                 {{ __('UET') }}
             </x-responsive-nav-link>
 
