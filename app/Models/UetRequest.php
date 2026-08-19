@@ -1,22 +1,31 @@
 <?php
-// app/Models/UetRequest.php
+
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\User;
+use App\Models\UetRequestItem;
+use App\Models\UetApproval;
 
 class UetRequest extends Model
 {
-    protected $fillable = ['applicant_id', 'reference_no', 'kepada', 'daripada', 'unit', 'jku_bil', 'request_date', 'alasan_keterangan', 'status'];
+    use HasFactory;
 
-    public function items(): HasMany
+    protected $guarded = [];
+
+    public function applicant()
+    {
+        return $this->belongsTo(User::class, 'applicant_id');
+    }
+
+    public function items()
     {
         return $this->hasMany(UetRequestItem::class);
     }
 
-    public function applicant(): BelongsTo
+    public function approval()
     {
-        return $this->belongsTo(User::class, 'applicant_id');
+        return $this->hasOne(UetApproval::class);
     }
 }

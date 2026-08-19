@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UetRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class UetApplicantController extends Controller
@@ -12,7 +13,7 @@ class UetApplicantController extends Controller
     // Applicant Dashboard View
     public function index()
     {
-        $requests = UetRequest::where('applicant_id', Auth::id())
+        $requests = UetRequest::where('applicant_id', Auth::id()) // Fixed: applicant_id
             ->with(['items'])
             ->latest()
             ->paginate(10); 
@@ -47,19 +48,19 @@ class UetApplicantController extends Controller
 
         DB::transaction(function () use ($validated, $request) {
             $uetData = [
-                'applicant_id' => Auth::id(),
-                'reference_no' => 'UET-' . date('Ymd') . '-' . rand(1000, 9999),
+                'applicant_id' => Auth::id(), // Fixed: applicant_id
+                'reference_no' => 'UET-' . strtoupper(Str::random(8)),
+                'jku_bil' => $validated['jku_bil'] ?? null,
                 'kepada' => $validated['kepada'],
                 'daripada' => $validated['daripada'],
                 'unit' => $validated['unit'],
-                'jku_bil' => $validated['jku_bil'] ?? null,
-                'request_date' => $validated['tarikh'],
-                'nama_pemohon' => $validated['nama_pemohon'] ?? null,
-                'status' => 'pending_oc_approval',
+                'tarikh' => $validated['tarikh'],
+                'nama_pemohon' => $validated['nama_pemohon'] ?? Auth::user()->name,
+                'status' => 'pending_oc',
             ];
 
-            // SECURITY RULE: Only allow updating Section 3, 4, and 5 fields if the current user is an OC
-            if (Auth::user()->role === 'oc') {
+            // Assign OC fields if user is OC (Role ID 2)
+            if (Auth::user()->role_id == 2) {
                 // Section 3
                 $uetData['nama_timb_peg_turus'] = $request->input('nama_timb_peg_turus');
                 
@@ -76,24 +77,24 @@ class UetApplicantController extends Controller
 
             foreach ($validated['items'] as $item) {
                 $uet->items()->create([
-                    'item_unit' => $item['sub_unit'] ?? null,
+                    'sub_unit' => $item['sub_unit'] ?? null,
                     'nama_barang' => $item['nama_barang'],
                     'qty_dipohon' => $item['qty_dipohon'],
                     'muka_surat_jku' => $item['muka_surat_jku'] ?? null,
-                    'status_pindaan' => $item['pindaan_type'],
+                    'pindaan_type' => $item['pindaan_type'],
                     'alasan' => $item['alasan'] ?? null,
                 ]);
             }
         });
 
-        return redirect()->route('uet.dashboard')->with('success', 'Permohonan UET berjaya dihantar!');
+        return redirect()->route('dashboard')->with('success', 'Permohonan UET berjaya dihantar!');
     }
 
-    // Show Request Details & Status Timeline
+    // Show Request Details
     public function show($id)
     {
         $uetRequest = UetRequest::with('items')
-            ->where('applicant_id', Auth::id())
+            ->where('applicant_id', Auth::id()) // Fixed: applicant_id
             ->findOrFail($id);
 
         return view('applicant.show', compact('uetRequest'));

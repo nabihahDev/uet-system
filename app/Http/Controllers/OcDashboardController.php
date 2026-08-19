@@ -1,58 +1,79 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\UetRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OcDashboardController extends Controller
 {
-    // Dashboard View
+    /**
+     * Display the OC Dashboard with pending reviews and stats.
+     */
     public function index()
     {
-        $pendingReviews = UetRequest::where('status', 'pending_oc')->latest()->get();
+        $pendingReviews = UetRequest::where('status', 'pending_oc')
+            ->latest()
+            ->get();
+
         $approvedCount = UetRequest::where('status', 'pending_qm')->count();
         $completedCount = UetRequest::where('status', 'completed')->count();
 
         return view('oc.dashboard', compact('pendingReviews', 'approvedCount', 'completedCount'));
     }
 
-    // Single Form Review Page
-    public function review($id)
+    /**
+     * Show single form review page for OC.
+     */
+    public function review(UetRequest $uet)
     {
-        $uet = UetRequest::with('items')->findOrFail($id);
-        return view('applicant.create', compact('uet')); // Reuses your Blade form in OC mode
+        // Eager load items for performance
+        $uet->load('items');
+
+        // Reuses Blade form in OC view mode
+        return view('applicant.create', compact('uet'));
     }
 
-    // Save OC Review, Signature, & Ulasan
-    public function updateReview(Request $request, $id)
+    /**
+     * Save OC Review, Signature, & Remarks.
+     */
+    public function updateReview(Request $request, UetRequest $uet)
     {
-        $uet = UetRequest::findOrFail($id);
-
-        $request->validate([
+        $validated = $request->validate([
+            'items' => 'required|array',
             'items.*.ulasan_timb_peg_turus' => 'required|string',
-            'nama_timb_peg_turus' => 'required|string',
+            'nama_timb_peg_turus' => 'required|string|max:255',
             'keputusan_jku' => 'required|in:diluluskan,tidak_diluluskan',
-            'nama_setiausaha' => 'required|string',
+            'bilangan_diluluskan' => 'nullable|integer|min:0',
+            'bilangan_tidak_diluluskan' => 'nullable|integer|min:0',
+            'nama_setiausaha' => 'required|string|max:255',
         ]);
 
-        // Update items (Column j: Ulasan Timb Peg Turus)
-        foreach ($request->items as $itemId => $itemData) {
-            $uet->items()->where('id', $itemId)->update([
-                'ulasan_timb_peg_turus' => $itemData['ulasan_timb_peg_turus']
+        DB::transaction(function () use ($request, $uet) {
+            // Update child item remarks
+            foreach ($request->items as $itemId => $itemData) {
+                $uet->items()
+                    ->where('id', $itemId)
+                    ->update([
+                        'ulasan_timb_peg_turus' => $itemData['ulasan_timb_peg_turus'],
+                    ]);
+            }
+
+            // Update main form details and move status to QM
+            $uet->update([
+                'nama_timb_peg_turus' => $request->nama_timb_peg_turus,
+                'keputusan_jku' => $request->keputusan_jku,
+                'bilangan_diluluskan' => $request->bilangan_diluluskan ?? 0,
+                'bilangan_tidak_diluluskan' => $request->bilangan_tidak_diluluskan ?? 0,
+                'nama_setiausaha' => $request->nama_setiausaha,
+                'status' => 'pending_qm',
+                'reviewed_at_oc' => now(),
             ]);
-        }
+        });
 
-        // Update OC main form fields & advance status
-        $uet->update([
-            'nama_timb_peg_turus' => $request->nama_timb_peg_turus,
-            'keputusan_jku' => $request->keputusan_jku,
-            'bilangan_diluluskan' => $request->bilangan_diluluskan,
-            'bilangan_tidak_diluluskan' => $request->bilangan_tidak_diluluskan,
-            'nama_setiausaha' => $request->nama_setiausaha,
-            'status' => 'pending_qm', // Moves task to Quartermaster / JKU
-            'reviewed_at_oc' => now(),
-        ]);
-
-        return redirect()->route('oc.dashboard')->with('success', 'UET application reviewed and forwarded to JKU.');
+        return redirect()
+            ->route('oc.dashboard')
+            ->with('success', 'UET application reviewed and forwarded to JKU successfully.');
     }
 }

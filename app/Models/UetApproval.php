@@ -5,11 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class UetRequestItem extends Model
+class UetApproval extends Model
 {
     use HasFactory;
-
-    protected $table = 'uet_items';
 
     protected $guarded = [];
 
