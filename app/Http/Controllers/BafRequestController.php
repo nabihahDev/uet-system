@@ -17,9 +17,11 @@ class BafRequestController extends Controller
     {
         $user = Auth::user();
 
-        if (in_array($user->role_id, [2,3,4,5,6])) {
-            // roles with queues see all requests for now; filter later by unit/role
-            $requests = BafRequest::orderBy('created_at', 'desc')->paginate(15);
+        // Semak jika user adalah Approver/Reviewer (bukan Applicant biasa)
+        $isApprover = in_array($user->role_id, [2, 3, 4, 5, 6]) || $user->role === 'oc';
+
+        if ($isApprover) {
+            $requests = BafRequest::with('creator')->orderBy('created_at', 'desc')->paginate(15);
         } else {
             $requests = BafRequest::where('created_by', $user->id)->orderBy('created_at', 'desc')->paginate(15);
         }
@@ -33,7 +35,7 @@ class BafRequestController extends Controller
 
         return view('requests.form', [
             'requestModel' => new BafRequest,
-            'canEditRequester' => $user->role_id === 1,
+            'canEditRequester' => true, // Applicant sentiasa boleh isi borang baru
             'canEditVoteController' => false,
             'canEditAuthoriser' => false,
         ]);
@@ -71,7 +73,7 @@ class BafRequestController extends Controller
             'items' => $validated['items'] ?? [],
             'user_section' => [
                 'filled_by' => $user->id,
-                'filled_at' => now(),
+                'filled_at' => now()->toDateTimeString(),
                 'request_type' => $validated['request_type'] ?? null,
                 'justification' => $validated['justification'] ?? null,
             ],
@@ -79,23 +81,24 @@ class BafRequestController extends Controller
             'status' => 'submitted',
         ]);
 
-        return redirect()->route('requests.show', $model)->with('success', 'Request submitted.');
+        return redirect()->route('requests.show', $model)->with('success', 'Permohonan BAF Q 140 berjaya dihantar.');
     }
 
     public function show(BafRequest $requestModel)
     {
         $user = Auth::user();
         $status = $requestModel->status;
+        $isOc = ($user->role_id === 2 || $user->role === 'oc');
 
         return view('requests.show', [
             'requestModel' => $requestModel,
-            // Role 1 (User / Requester) can edit if draft or returned
-            'canEditRequester' => ($user->role_id === 1) && in_array($status, ['draft', 'returned']),
+            // Applicant boleh edit jika borang masih draf atau dikembalikan
+            'canEditRequester' => ($user->created_by === $user->id || $user->role_id === 1) && in_array($status, ['draft', 'returned']),
             
-            // Role 2 / OC (or Vote Controller) can edit when submitted
-            'canEditVoteController' => ($user->role_id === 2 || $user->role_id === 4) && in_array($status, ['submitted', 'oc_endorsed']),
+            // OC / Vote Controller boleh edit apabila status 'submitted'
+            'canEditVoteController' => $isOc && in_array($status, ['submitted', 'oc_endorsed']),
             
-            // Role 3 (CO) / Authoriser can edit when endorsed
+            // Authoriser/CO
             'canEditAuthoriser' => in_array($user->role_id, [2, 3, 6]) && in_array($status, ['submitted', 'oc_endorsed', 'co_authorized']),
         ]);
     }
@@ -104,99 +107,130 @@ class BafRequestController extends Controller
     {
         $user = $request->user();
 
-        // USER updates own section
-        if ($user->role_id === 1) {
+        // 1. APPLICANT / USER update bahagian sendiri
+        if ($user->role_id === 1 || $user->id === $requestModel->created_by) {
             $validated = $request->validate([
                 'unit_code' => 'required|string|max:100',
                 'required_by' => 'nullable|date',
                 'items' => 'nullable|array',
-                'items.*.description' => 'nullable|string',
-                'items.*.qty' => 'nullable|integer|min:1',
             ]);
+
+            $userSection = $requestModel->user_section ?? [];
+            $userSection['updated_by'] = $user->id;
+            $userSection['updated_at'] = now()->toDateTimeString();
 
             $requestModel->update([
                 'unit_code' => $validated['unit_code'],
                 'required_by' => $validated['required_by'] ?? $requestModel->required_by,
                 'items' => $validated['items'] ?? $requestModel->items ?? [],
-                'user_section' => array_merge($requestModel->user_section ?? [], ['updated_by' => $user->id, 'updated_at' => now()]),
+                'user_section' => $userSection,
                 'status' => 'submitted',
             ]);
 
-            return back()->with('success', 'Your section was updated.');
+            return back()->with('success', 'Maklumat permohonan telah dikemaskini.');
         }
 
-        // OC endorsement
-        if ($user->role_id === 2) {
+        // 2. OC ENDORSEMENT
+        if ($user->role_id === 2 || $user->role === 'oc') {
             $validated = $request->validate([
                 'oc_note' => 'nullable|string',
                 'oc_endorse' => 'nullable|in:0,1',
             ]);
 
-            $ocData = array_merge($requestModel->oc_section ?? [], ['note' => $validated['oc_note'] ?? null, 'endorsed' => (int)($validated['oc_endorse'] ?? 0), 'by' => $user->id, 'at' => now()]);
+            $ocData = array_merge($requestModel->oc_section ?? [], [
+                'note' => $validated['oc_note'] ?? null,
+                'endorsed' => (int)($validated['oc_endorse'] ?? 0),
+                'by' => $user->id,
+                'at' => now()->toDateTimeString()
+            ]);
+
             $requestModel->oc_section = $ocData;
             $requestModel->status = ($ocData['endorsed'] ? 'oc_endorsed' : 'returned');
             $requestModel->save();
 
-            return back()->with('success', 'OC decision recorded.');
+            return back()->with('success', 'Keputusan OC telah disimpan.');
         }
 
-        // CO authorization
+        // 3. CO AUTHORIZATION
         if ($user->role_id === 3) {
             $validated = $request->validate([
                 'co_note' => 'nullable|string',
                 'co_authorize' => 'nullable|in:0,1',
             ]);
 
-            $coData = array_merge($requestModel->co_section ?? [], ['note' => $validated['co_note'] ?? null, 'authorized' => (int)($validated['co_authorize'] ?? 0), 'by' => $user->id, 'at' => now()]);
+            $coData = array_merge($requestModel->co_section ?? [], [
+                'note' => $validated['co_note'] ?? null,
+                'authorized' => (int)($validated['co_authorize'] ?? 0),
+                'by' => $user->id,
+                'at' => now()->toDateTimeString()
+            ]);
+
             $requestModel->co_section = $coData;
             $requestModel->status = ($coData['authorized'] ? 'co_authorized' : 'co_rejected');
             $requestModel->save();
 
-            return back()->with('success', 'CO decision recorded.');
+            return back()->with('success', 'Keputusan CO telah disimpan.');
         }
 
-        // QM verification
+        // 4. QM VERIFICATION
         if ($user->role_id === 4) {
             $validated = $request->validate([
                 'qm_note' => 'nullable|string',
                 'qm_verified' => 'nullable|in:0,1',
             ]);
 
-            $qmData = array_merge($requestModel->qm_section ?? [], ['note' => $validated['qm_note'] ?? null, 'verified' => (int)($validated['qm_verified'] ?? 0), 'by' => $user->id, 'at' => now()]);
+            $qmData = array_merge($requestModel->qm_section ?? [], [
+                'note' => $validated['qm_note'] ?? null,
+                'verified' => (int)($validated['qm_verified'] ?? 0),
+                'by' => $user->id,
+                'at' => now()->toDateTimeString()
+            ]);
+
             $requestModel->qm_section = $qmData;
             $requestModel->status = ($qmData['verified'] ? 'qm_verified' : 'qm_stop');
             $requestModel->save();
 
-            return back()->with('success', 'QM verification recorded.');
+            return back()->with('success', 'Verifikasi QM telah disimpan.');
         }
 
-        // Pegawai review
+        // 5. PEGAWAI REVIEW
         if ($user->role_id === 5) {
             $validated = $request->validate([
                 'pegawai_note' => 'nullable|string',
             ]);
 
-            $pegawaiData = array_merge($requestModel->pegawai_section ?? [], ['note' => $validated['pegawai_note'] ?? null, 'by' => $user->id, 'at' => now()]);
+            $pegawaiData = array_merge($requestModel->pegawai_section ?? [], [
+                'note' => $validated['pegawai_note'] ?? null,
+                'by' => $user->id,
+                'at' => now()->toDateTimeString()
+            ]);
+
             $requestModel->pegawai_section = $pegawaiData;
             $requestModel->status = 'pegawai_reviewed';
             $requestModel->save();
 
-            return back()->with('success', 'Pegawai review saved.');
+            return back()->with('success', 'Semakan Pegawai telah disimpan.');
         }
 
-        // MINDEF final decision
+        // 6. MINDEF FINAL DECISION
         if ($user->role_id === 6) {
             $validated = $request->validate([
                 'mindef_decision' => 'required|in:approved,rejected',
                 'mindef_note' => 'nullable|string',
             ]);
 
-            $mindef = ['decision' => $validated['mindef_decision'], 'note' => $validated['mindef_note'] ?? null, 'by' => $user->id, 'at' => now()];
+            $mindef = [
+                'decision' => $validated['mindef_decision'],
+                'note' => $validated['mindef_note'] ?? null,
+                'by' => $user->id,
+                'at' => now()->toDateTimeString()
+            ];
+
             $requestModel->mindef_section = $mindef;
             $requestModel->status = ($validated['mindef_decision'] === 'approved') ? 'approved' : 'rejected';
             $requestModel->save();
 
-            return back()->with('success', 'Final decision recorded.');
+            return back()->with('success', 'Keputusan Akhir MINDEF telah disimpan.');
         }
 
         abort(403);

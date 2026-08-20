@@ -93,10 +93,10 @@ class UetApplicantController extends Controller
     // Show Request Details
     public function show($id)
     {
-        $uetRequest = UetRequest::with('items')
+        $requestModel = UetRequest::with('items')
             ->where('applicant_id', Auth::id()) // Fixed: applicant_id
             ->findOrFail($id);
 
-        return view('applicant.show', compact('uetRequest'));
+        return view('requests.show', compact('requestModel'));
     }
 }
