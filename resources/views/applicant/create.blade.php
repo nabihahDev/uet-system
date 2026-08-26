@@ -217,93 +217,102 @@
                 @endif
 
                 <!-- BOTTOM SECTIONS -->
-                <div class="grid grid-cols-12 gap-6 border-t-2 border-slate-900 pt-4">
+<div class="grid grid-cols-12 gap-6 border-t-2 border-slate-900 pt-4">
 
-                    <!-- LEFT SIDE -->
-                    <div class="col-span-12 md:col-span-7 space-y-4">
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold whitespace-nowrap text-[11px]">2. Tanda Tangan dan nama KM/Pemohon :</span>
-                            <div class="flex-1 border border-dashed border-slate-900 h-8 px-2 flex items-center bg-white">
-                                <input type="text" name="nama_pemohon" value="{{ old('nama_pemohon', $uetRequest->nama_pemohon ?? '') }}"
-                                       @if(auth()->user()->role === 'oc' || auth()->user()->role === 'qm') readonly @endif
-                                       class="w-full border-0 p-0 text-xs focus:ring-0 {{ auth()->user()->role === 'oc' || auth()->user()->role === 'qm' ? 'cursor-not-allowed text-slate-500' : 'bg-transparent' }}">
-                            </div>
-                        </div>
+    <!-- LEFT SIDE -->
+    <div class="col-span-12 md:col-span-7 space-y-4">
+        
+        <!-- 2. PEMOHON SIGNATURE -->
+        <div class="flex items-center gap-2">
+            <span class="font-bold whitespace-nowrap text-[11px] w-52">2. Tanda Tangan dan nama KM/Pemohon :</span>
+            <div class="flex-1 border border-dashed border-slate-900 min-h-[36px] px-2 py-1 flex items-center justify-between bg-white font-semibold uppercase">
+                <span>{{ auth()->user()->name }}</span>
+                @if(auth()->user()->signature_path)
+                    <img src="{{ Storage::url(auth()->user()->signature_path) }}" alt="Signature" class="h-8 max-w-[120px] object-contain">
+                @else
+                    <span class="text-[10px] text-rose-500 font-normal italic print:hidden">(Tiada tanda tangan dalam profil)</span>
+                @endif
+            </div>
+        </div>
 
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold whitespace-nowrap text-[11px]">3. Tanda Tangan dan nama Timb Peg Turus Unit :</span>
-                            <div class="flex-1 border border-dashed border-slate-900 h-8 px-2 flex items-center bg-white">
-                                <input type="text" name="nama_timb_peg_turus" value="{{ old('nama_timb_peg_turus', $uetRequest->approval->nama_timb_peg_turus ?? '') }}"
-                                       @if(auth()->user()->role !== 'oc') readonly @endif
-                                       class="w-full border-0 p-0 text-xs focus:ring-0 {{ auth()->user()->role !== 'oc' ? 'cursor-not-allowed text-slate-500' : 'bg-transparent' }}">
-                            </div>
-                        </div>
-
-                        <div class="border border-slate-900 p-3 space-y-2 bg-white">
-                            <div class="font-bold text-[11px]">4. Keputusan Jawatankuasa tetap cadangan ECC/UETSC</div>
-                            <div class="pl-4 space-y-2">
-                                <label class="flex items-center gap-2 {{ auth()->user()->role !== 'oc' ? 'pointer-events-none' : '' }}">
-                                    <input type="radio" name="keputusan_jku" value="diluluskan" 
-                                           @checked(old('keputusan_jku', $uetRequest->approval->keputusan_jku ?? '') === 'diluluskan')
-                                           @if(auth()->user()->role !== 'oc') disabled @endif class="text-slate-800">
-                                    <span class="text-xs">a. Diluluskan bagi pindaan kepada bilangan :</span>
-                                    <input type="text" name="bilangan_diluluskan" value="{{ old('bilangan_diluluskan', $uetRequest->approval->bilangan_diluluskan ?? '') }}"
-                                           @if(auth()->user()->role !== 'oc') readonly @endif 
-                                           class="border border-slate-800 px-2 py-0.5 text-xs w-28 focus:ring-0 {{ auth()->user()->role !== 'oc' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-transparent' }}">
-                                </label>
-                                
-                                <label class="flex items-center gap-2 {{ auth()->user()->role !== 'oc' ? 'pointer-events-none' : '' }}">
-                                    <input type="radio" name="keputusan_jku" value="tidak_diluluskan" 
-                                           @checked(old('keputusan_jku', $uetRequest->approval->keputusan_jku ?? '') === 'tidak_diluluskan')
-                                           @if(auth()->user()->role !== 'oc') disabled @endif class="text-slate-800">
-                                    <span class="text-xs">b. Tidak diluluskan bagi pindaan kepada bilangan :</span>
-                                    <input type="text" name="bilangan_tidak_diluluskan" value="{{ old('bilangan_tidak_diluluskan', $uetRequest->approval->bilangan_tidak_diluluskan ?? '') }}"
-                                           @if(auth()->user()->role !== 'oc') readonly @endif 
-                                           class="border border-slate-800 px-2 py-0.5 text-xs w-28 focus:ring-0 {{ auth()->user()->role !== 'oc' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-transparent' }}">
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center gap-2 pt-1">
-                            <span class="font-bold whitespace-nowrap text-[11px]">5. Tanda Tangan dan nama Setiausaha ECC/MCSC/UETSC :</span>
-                            <div class="flex-1 border border-slate-900 h-8 px-2 flex items-center bg-white">
-                                <input type="text" name="nama_setiausaha" value="{{ old('nama_setiausaha', $uetRequest->approval->nama_setiausaha ?? '') }}"
-                                       @if(auth()->user()->role !== 'oc') readonly @endif 
-                                       class="w-full border-0 p-0 text-xs focus:ring-0 {{ auth()->user()->role !== 'oc' ? 'cursor-not-allowed text-slate-500' : 'bg-transparent' }}">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT SIDE -->
-                    <div class="col-span-12 md:col-span-5 border border-slate-900 p-3 bg-slate-50 space-y-4 flex flex-col justify-between">
-                        <div>
-                            <div class="font-bold text-center uppercase border-b border-slate-900 pb-1.5 mb-3 text-[11px] tracking-tight">
-                                TINDAKAN DIBUAT OLEH YANG BERKENAAN SAHAJA
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="block font-bold mb-1 text-[11px]">6. Pindaan oleh Pembantu Staf JKU :</label>
-                                <input type="text" name="pindaan_bilangan_jku" value="{{ old('pindaan_bilangan_jku', $uetRequest->approval->pindaan_bilangan_jku ?? '') }}"
-                                       @if(auth()->user()->role !== 'qm') readonly @endif 
-                                       class="w-full border border-slate-400 p-1.5 text-xs h-8 {{ auth()->user()->role !== 'qm' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white' }}">
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="block font-bold mb-1 text-[11px]">7. Nama Pembantu Staf JKU :</label>
-                                <input type="text" name="nama_pembantu_staf_jku" value="{{ old('nama_pembantu_staf_jku', $uetRequest->approval->nama_pembantu_staf_jku ?? '') }}"
-                                       @if(auth()->user()->role !== 'qm') readonly @endif 
-                                       class="w-full border border-slate-400 p-1.5 text-xs h-8 {{ auth()->user()->role !== 'qm' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white' }}">
-                            </div>
-
-                            <div>
-                                <label class="block font-bold mb-1 text-[11px]">8. Nama Timb Peg Turus PP & JKU :</label>
-                                <input type="text" name="nama_timb_peg_turus_jku" value="{{ old('nama_timb_peg_turus_jku', $uetRequest->approval->nama_timb_peg_turus_jku ?? '') }}"
-                                       @if(auth()->user()->role !== 'qm') readonly @endif 
-                                       class="w-full border border-slate-400 p-1.5 text-xs h-8 {{ auth()->user()->role !== 'qm' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white' }}">
-                            </div>
-                        </div>
-                    </div>
+        <!-- 3. TIMB PEG TURUS SIGNATURE & PIN APPROVAL -->
+        <div class="space-y-1">
+            <div class="flex items-center gap-2">
+                <span class="font-bold whitespace-nowrap text-[11px] w-52">3. Tanda Tangan & nama Timb Peg Turus Unit :</span>
+                <div class="flex-1 border border-dashed border-slate-900 min-h-[36px] px-2 py-1 flex items-center justify-between bg-slate-100 font-semibold uppercase text-slate-500 italic text-xs">
+                    <span>- (Menunggu Kelulusan) -</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- 4. KEPUTUSAN JAWATANKUASA -->
+        <div class="border border-slate-900 p-3 space-y-2 bg-white">
+            <div class="font-bold text-[11px]">4. Keputusan Jawatankuasa tetap cadangan ECC/UETSC</div>
+            <div class="pl-4 space-y-2">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="keputusan_jku" value="diluluskan" class="rounded border-slate-400" {{ old('keputusan_jku') === 'diluluskan' ? 'checked' : '' }}>
+                    <span class="text-xs">a. Diluluskan bagi pindaan kepada bilangan :</span>
+                    <input type="text" name="bilangan_diluluskan" value="{{ old('bilangan_diluluskan') }}" class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" name="keputusan_jku" value="tidak_diluluskan" class="rounded border-slate-400" {{ old('keputusan_jku') === 'tidak_diluluskan' ? 'checked' : '' }}>
+                    <span class="text-xs">b. Tidak diluluskan bagi pindaan kepada bilangan :</span>
+                    <input type="text" name="bilangan_tidak_diluluskan" value="{{ old('bilangan_tidak_diluluskan') }}" class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. SETIAUSAHA SIGNATURE -->
+        <div class="flex items-center gap-2">
+            <span class="font-bold whitespace-nowrap text-[11px] w-52">5. Tanda Tangan & nama Setiausaha :</span>
+            <div class="flex-1 border border-slate-900 min-h-[36px] px-2 py-1 flex items-center justify-between bg-slate-100 font-semibold uppercase text-slate-500 italic text-xs">
+                <span>- (Menunggu Pengesahan) -</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="col-span-12 md:col-span-5 border border-slate-900 p-3 bg-slate-50 space-y-3">
+        <div class="font-bold text-center uppercase border-b border-slate-900 pb-1.5 text-[11px]">
+            TINDAKAN DIBUAT OLEH YANG BERKENAAN SAHAJA
+        </div>
+
+        <div>
+            <label class="block font-bold mb-1 text-[11px]">6. Pindaan oleh Pembantu Staf JKU :</label>
+            <input type="text" name="pindaan_bilangan_jku" value="{{ old('pindaan_bilangan_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold">
+        </div>
+
+        <div>
+            <label class="block font-bold mb-1 text-[11px]">7. Nama Pembantu Staf JKU :</label>
+            <input type="text" name="nama_pembantu_staf_jku" value="{{ old('nama_pembantu_staf_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
+        </div>
+
+        <div>
+            <label class="block font-bold mb-1 text-[11px]">8. Nama Timb Peg Turus PP & JKU :</label>
+            <input type="text" name="nama_timb_peg_turus_jku" value="{{ old('nama_timb_peg_turus_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
+        </div>
+    </div>
+</div>
+
+    <!-- FILE ATTACHMENT SECTION -->
+    <div class="mt-4 border border-slate-900 p-3 bg-white">
+        <label class="block font-bold text-xs mb-1 text-slate-800">
+            Lampiran / File Attachment (PDF, PNG, JPG - Max 2MB):
+        </label>
+        <input type="file" 
+               name="attachment" 
+               id="attachment" 
+               class="block w-full text-xs text-slate-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-xs file:font-semibold
+                      file:bg-slate-900 file:text-white
+                      hover:file:bg-slate-700">
+        @error('attachment')
+            <span class="text-xs text-rose-600 mt-1 block">{{ $message }}</span>
+        @enderror
+    </div>
 
                 <div class="mt-8 flex justify-end gap-3 border-t border-slate-300 pt-4">
                     <button type="submit" name="action" value="draft" class="px-5 py-2 border border-slate-800 text-slate-800 font-bold hover:bg-slate-100">
