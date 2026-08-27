@@ -27,7 +27,7 @@ Route::middleware(['auth', 'verified'])->prefix('uet')->name('uet.')->group(func
 
 // BAF Q 140 Routes
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/bafq140/create', [BafQ140Controller::class, 'create'])->name('bafq140.create');
+    Route::get('/bafq140/create', [BafRequestController::class, 'create'])->name('bafq140.create');
 });
 
 // User Profile & BAF Request Routes
