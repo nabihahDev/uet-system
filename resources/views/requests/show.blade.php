@@ -1,237 +1,441 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <!-- Include SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .baf-form-container {
+            max-width: 1100px;
+            margin: 24px auto;
+            background: #ffffff;
+            padding: 32px;
+            border: 1px solid #000000;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #000000;
+            font-size: 12px;
+        }
+        
+        .baf-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid #000000;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .baf-title-box {
+            border: 1px solid #000000;
+            font-weight: 700;
+            padding: 6px 14px;
+            display: inline-block;
+            font-size: 15px;
+            letter-spacing: 0.025em;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Sharp Grid Cards */
+        .baf-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            border: 1px solid #000000;
+            background: #ffffff;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        
+        .baf-grid-cell {
+            border-right: 1px solid #000000;
+            padding: 8px;
+        }
+        
+        .baf-grid-cell:last-child {
+            border-right: none;
+        }
+
+        /* Sharp Border Inputs */
+        .baf-input {
+            width: 100%;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            padding: 5px 8px;
+            font-size: 12px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .baf-input:read-only, .baf-textarea:read-only {
+            background-color: #f3f4f6;
+            color: #374151;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .baf-textarea {
+            width: 100%;
+            border: 1px solid #000000;
+            border-radius: 0px;
+            padding: 4px 6px;
+            font-size: 11px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            color: #000000;
+            font-family: inherit;
+            resize: none;
+            min-height: 28px;
+            overflow-y: hidden;
+            display: block;
+        }
+
+        /* Formal Table Styling */
+        .baf-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            text-align: center;
+            margin-bottom: 8px;
+            border: 1px solid #000000;
+        }
+        
+        .baf-table th, .baf-table td {
+            border: 1px solid #000000;
+            padding: 6px 4px;
+            vertical-align: middle;
+            position: relative;
+        }
+        
+        .baf-table th {
+            background-color: #e5e7eb;
+            color: #000000;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 10px;
+        }
+
+        .baf-table-wrapper {
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .baf-picking-box {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            border: 1px solid #000000;
+            margin-bottom: 16px;
+        }
+        
+        .baf-picking-left {
+            padding: 10px;
+            border-right: 1px solid #000000;
+        }
+        
+        .baf-picking-right {
+            padding: 10px;
+            background: #ffffff;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .baf-bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .baf-section-box {
+            border: 1px solid #000000;
+            border-radius: 0px;
+            padding: 10px;
+            background-color: #ffffff;
+        }
+
+        .baf-btn {
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 0px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back-active {
+        display: inline-block;
+        background-color: #0f172a; /* Warna gelap solid (navy/black) */
+        color: #ffffff !important;  /* Teks putih terang */
+        padding: 8px 16px;
+        border-radius: 0px;
+        font-weight: 600;
+        text-decoration: none;
+        opacity: 1 !important;      /* Paksa opacity penuh */
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        }
+
+        .btn-back-active:hover {
+        background-color: #1e293b; /* Kesan hover sedikit terang */
+        color: #ffffff;
+        }
+
+        .baf-btn-secondary { background-color: #4b5563; color: #ffffff; }
+        .baf-btn-secondary:hover { background-color: #374151; }
+    </style>
+
+    <div class="baf-form-container">
+        <!-- HEADER SECTION -->
+        <div class="baf-header">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Requisition Review') }}</h2>
-                <p class="text-sm text-gray-500">Request #{{ $requestModel->id }} • {{ ucfirst($requestModel->status) }}</p>
+                <div class="baf-title-box">REQUISITION FORM</div>
+                <div style="margin-top: 12px; display: flex; gap: 16px; align-items: center; color: #374151;">
+                    <span style="font-weight: 600;">Requisition Type:</span>
+                    
+                    <label class="inline-flex items-center gap-1">
+                        <input type="radio" disabled {{ ($requestModel->requisition_type ?? '') === 'stock' ? 'checked' : '' }}>
+                        <span>STOCK (Catalogued Items)</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-1">
+                        <input type="radio" disabled {{ ($requestModel->requisition_type ?? '') === 'services' ? 'checked' : '' }}>
+                        <span>SERVICES (Non-Catalogued Items)</span>
+                    </label>
+
+                    <label class="inline-flex items-center gap-1">
+                        <input type="radio" disabled {{ ($requestModel->requisition_type ?? '') === 'return_to_store' ? 'checked' : '' }}>
+                        <span>RETURN TO STORE (Credits)</span>
+                    </label>
+                </div>
             </div>
-            <div class="flex items-center gap-3">
-                <span class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-gray-600">Status: {{ ucfirst($requestModel->status) }}</span>
-                <span class="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-indigo-700">REQ-2026-0804</span>
-            </div>
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    @if(session('success'))
-                        <div class="mb-4 rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-700">{{ session('success') }}</div>
-                    @endif
-
-                    <div class="mb-6 rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="flex flex-wrap items-center justify-between gap-3">
-                            <div class="text-sm font-semibold text-gray-700">Workflow Steps</div>
-                            <div class="flex flex-wrap gap-2 text-sm">
-                                <span class="rounded-full bg-indigo-600 px-3 py-1 text-white">1. General Information</span>
-                                <span class="rounded-full bg-indigo-600 px-3 py-1 text-white">2. Requested Items</span>
-                                <span class="rounded-full bg-indigo-600 px-3 py-1 text-white">3. Justification & Delivery</span>
-                                <span class="rounded-full bg-gray-200 px-3 py-1 text-gray-600">4. Review & Sign</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <section class="border rounded-lg p-4 bg-white">
-                            <h3 class="font-semibold text-gray-800">1. General Information</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-3">
-                                <div><strong>Unit Code:</strong> {{ $requestModel->unit_code ?? '-' }}</div>
-                                <div><strong>Required By:</strong> {{ optional($requestModel->required_by)->format('Y-m-d') ?? '-' }}</div>
-                                <div><strong>Priority:</strong> {{ $requestModel->priority ?? '-' }}</div>
-                                <div><strong>Request Type:</strong> {{ $requestModel->user_section['request_type'] ?? '-' }}</div>
-                            </div>
-                        </section>
-
-                        <section class="border rounded-lg p-4 bg-white">
-                            <h3 class="font-semibold text-gray-800">2. Requested Items</h3>
-                            <div class="overflow-x-auto mt-3">
-                                <table class="min-w-full divide-y divide-gray-200">
-                                    <thead class="bg-gray-50">
-                                        <tr>
-                                            <th class="px-2 py-2 text-xs">#</th>
-                                            <th class="px-2 py-2 text-xs">Description</th>
-                                            <th class="px-2 py-2 text-xs">Part / Stock No</th>
-                                            <th class="px-2 py-2 text-xs">Qty</th>
-                                            <th class="px-2 py-2 text-xs">Unit Cost</th>
-                                            <th class="px-2 py-2 text-xs">Total</th>
-                                            <th class="px-2 py-2 text-xs">Reason</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        @foreach($requestModel->items ?? [] as $i => $it)
-                                            <tr>
-                                                <td class="px-2 py-2 text-sm">{{ $i+1 }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ $it['description'] ?? '-' }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ $it['part_number'] ?? '-' }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ $it['qty'] ?? '-' }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ $it['est_cost'] ?? '-' }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ (($it['qty'] ?? 0) * ($it['est_cost'] ?? 0)) }}</td>
-                                                <td class="px-2 py-2 text-sm">{{ $it['reason'] ?? '-' }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-
-                        <section class="border rounded-lg p-4 bg-white">
-                            <h3 class="font-semibold text-gray-800">3. Justification & Delivery</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                                <div>
-                                    <div class="text-sm font-semibold text-gray-700">Reason for Demand / Alasan</div>
-                                    <p class="mt-2 text-sm text-gray-700">{{ $requestModel->user_section['justification'] ?? 'No justification entered yet.' }}</p>
-                                </div>
-                                <div>
-                                    <div class="text-sm font-semibold text-gray-700">Delivery / Picking Instructions</div>
-                                    <p class="mt-2 text-sm text-gray-700">{{ $requestModel->user_section['delivery_instructions'] ?? 'No instructions entered yet.' }}</p>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section class="border rounded-lg p-4 bg-gray-50">
-                            <h3 class="font-semibold text-gray-800">4. Review & Sign</h3>
-                            <div class="mt-3 grid gap-3 md:grid-cols-3">
-                                <div class="rounded border bg-white p-3">
-                                    <div class="text-sm font-semibold">Submitted By</div>
-                                    <div class="text-xs text-gray-500">{{ $requestModel->creator->name ?? 'Unknown' }}</div>
-                                </div>
-                                <div class="rounded border bg-white p-3">
-                                    <div class="text-sm font-semibold">Approver Actions</div>
-                                    <div class="text-xs text-gray-500">OC, CO, QM, Pegawai and MINDEF actions will appear here.</div>
-                                </div>
-                                <div class="rounded border bg-white p-3">
-                                    <div class="text-sm font-semibold">Digital Timestamp</div>
-                                    <div class="text-xs text-gray-500">Approval history is recorded automatically.</div>
-                                </div>
-                            </div>
-                        </section>
-                    </div>
-
-                    <hr class="my-4" />
-
-                    <form method="POST" action="{{ route('requests.update', $requestModel) }}">
-                        @csrf
-                        @method('PATCH')
-
-                        <div class="mb-6 p-4 border rounded bg-gray-50">
-                            <div class="font-semibold">Role-based Action Panel</div>
-                            <div class="mt-2 text-sm text-gray-600">The current role will only see the section that applies to them.</div>
-                        </div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 1 ? 'border-blue-400' : 'bg-gray-50' }}">
-    <div class="font-semibold">Requester Section</div>
-    @php $canEditUser = auth()->user()->role_id === 1 && in_array($requestModel->status, ['draft','returned','submitted']); @endphp
-    
-    <div class="mt-2">
-        <label class="block text-sm font-medium text-gray-700">Unit Code</label>
-        <input type="text" name="unit_code" value="{{ old('unit_code', $requestModel->unit_code) }}" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditUser ? '' : 'disabled' }} />
-    </div>
-
-    @if($canEditUser)
-        <div class="mt-3">
-            <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded">Save Request</button>
-        </div>
-    @endif
-</div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 2 ? 'border-indigo-400' : 'bg-gray-50' }}">
-                            <div class="font-semibold">OC Section</div>
-                            @php $canEditOc = auth()->user()->role_id === 2 && $requestModel->status === 'submitted'; @endphp
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">OC Note</label>
-                                <textarea name="oc_note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditOc ? '' : 'disabled' }}>{{ old('oc_note', $requestModel->oc_section['note'] ?? '') }}</textarea>
-                            </div>
-                            <div class="mt-2">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" name="oc_endorse" value="1" {{ ($requestModel->oc_section['endorsed'] ?? false) ? 'checked' : '' }} {{ $canEditOc ? '' : 'disabled' }} />
-                                    <span class="ms-2">Endorse</span>
-                                </label>
-                            </div>
-                            @if($canEditOc)
-                                <div class="mt-3">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded">Save OC Decision</button>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 3 ? 'border-teal-400' : 'bg-gray-50' }}">
-                            <div class="font-semibold">CO Section</div>
-                            @php $canEditCo = auth()->user()->role_id === 3 && $requestModel->status === 'oc_endorsed'; @endphp
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">CO Note</label>
-                                <textarea name="co_note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditCo ? '' : 'disabled' }}>{{ old('co_note', $requestModel->co_section['note'] ?? '') }}</textarea>
-                            </div>
-                            <div class="mt-2">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" name="co_authorize" value="1" {{ ($requestModel->co_section['authorized'] ?? false) ? 'checked' : '' }} {{ $canEditCo ? '' : 'disabled' }} />
-                                    <span class="ms-2">Authorize</span>
-                                </label>
-                            </div>
-                            @if($canEditCo)
-                                <div class="mt-3">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-teal-600 text-white rounded">Save CO Decision</button>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 4 ? 'border-amber-400' : 'bg-gray-50' }}">
-                            <div class="font-semibold">QM Section</div>
-                            @php $canEditQm = auth()->user()->role_id === 4 && $requestModel->status === 'co_authorized'; @endphp
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">QM Note</label>
-                                <textarea name="qm_note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditQm ? '' : 'disabled' }}>{{ old('qm_note', $requestModel->qm_section['note'] ?? '') }}</textarea>
-                            </div>
-                            <div class="mt-2">
-                                <label class="inline-flex items-center">
-                                    <input type="checkbox" name="qm_verified" value="1" {{ ($requestModel->qm_section['verified'] ?? false) ? 'checked' : '' }} {{ $canEditQm ? '' : 'disabled' }} />
-                                    <span class="ms-2">Verify</span>
-                                </label>
-                            </div>
-                            @if($canEditQm)
-                                <div class="mt-3">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-amber-600 text-white rounded">Save QM Decision</button>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 5 ? 'border-purple-400' : 'bg-gray-50' }}">
-                            <div class="font-semibold">Pegawai Section</div>
-                            @php $canEditPegawai = auth()->user()->role_id === 5 && $requestModel->status === 'qm_verified'; @endphp
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">Pegawai Note / Recommendation</label>
-                                <textarea name="pegawai_note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditPegawai ? '' : 'disabled' }}>{{ old('pegawai_note', $requestModel->pegawai_section['note'] ?? '') }}</textarea>
-                            </div>
-                            @if($canEditPegawai)
-                                <div class="mt-3">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded">Save Pegawai Note</button>
-                                </div>
-                            @endif
-                        </div>
-
-                        <div class="mb-6 p-4 border rounded {{ auth()->user()->role_id === 6 ? 'border-green-400' : 'bg-gray-50' }}">
-                            <div class="font-semibold">MINDEF Decision</div>
-                            @php $canEditMindef = auth()->user()->role_id === 6 && in_array($requestModel->status, ['pegawai_reviewed','qm_verified']); @endphp
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">Decision</label>
-                                <select name="mindef_decision" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditMindef ? '' : 'disabled' }}>
-                                    <option value="approved" {{ ($requestModel->mindef_section['decision'] ?? '') === 'approved' ? 'selected' : '' }}>DILULUSKAN</option>
-                                    <option value="rejected" {{ ($requestModel->mindef_section['decision'] ?? '') === 'rejected' ? 'selected' : '' }}>TIDAK DILULUSKAN</option>
-                                </select>
-                            </div>
-                            <div class="mt-2">
-                                <label class="block text-sm font-medium text-gray-700">Notes</label>
-                                <textarea name="mindef_note" rows="3" class="mt-1 block w-full border-gray-300 rounded-md" {{ $canEditMindef ? '' : 'disabled' }}>{{ old('mindef_note', $requestModel->mindef_section['note'] ?? '') }}</textarea>
-                            </div>
-                            @if($canEditMindef)
-                                <div class="mt-3">
-                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded">Save Final Decision</button>
-                                </div>
-                            @endif
-                        </div>
-                    </form>
+            <div style="text-align: right;">
+                <div style="font-weight: 700; font-size: 14px; color: #111827;">BAF Q 140</div>
+                <div style="margin-top: 6px; color: #374151;">
+                    <strong>REQ. NO:</strong> 
+                    <span style="border-bottom: 1.5px solid #374151; padding: 2px 8px; font-family: monospace; font-weight: 600;">{{ $requestModel->req_no ?? '-' }}</span>
                 </div>
             </div>
         </div>
+
+        <!-- TOP FIELD METRICS -->
+        <div class="baf-grid-4">
+            <div class="baf-grid-cell">
+                <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">UNIT CODE</label>
+                <input type="text" value="{{ $requestModel->unit_code ?? '' }}" class="baf-input" style="text-align: center;" readonly>
+            </div>
+            <div class="baf-grid-cell">
+                <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">REQUIRED BY DATE</label>
+                <input type="text" value="{{ $requestModel->required_by ?? '' }}" class="baf-input" style="text-align: center;" readonly>
+            </div>
+            <div class="baf-grid-cell">
+                <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PRIORITY (1, 2, 3 OR 4)</label>
+                <input type="text" value="{{ $requestModel->priority ?? '' }}" class="baf-input" style="text-align: center;" readonly>
+            </div>
+            <div class="baf-grid-cell">
+                <label style="font-weight: 600; display: block; margin-bottom: 4px; color: #374151;">PART ISSUE (Y/N)</label>
+                <input type="text" value="{{ $requestModel->part_issue ?? '' }}" class="baf-input" style="text-align: center;" readonly>
+            </div>
+        </div>
+
+        <!-- TABLE ITEMS WRAPPER -->
+        <div class="baf-table-wrapper">
+            <table class="baf-table" id="items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 30px;">Item No</th>
+                        <th style="width: 50px;">Qty Req'd</th>
+                        <th style="width: 50px;">Unit (UOM)</th>
+                        <th style="width: 50px;">Req. Type S/P</th>
+                        <th style="width: 80px;">Stock Code</th>
+                        <th style="width: 100px;">Suggested Mfr/Supplier</th>
+                        <th style="width: 100px;">Part No</th>
+                        <th>Description</th>
+                        <th style="width: 80px;">Est. Cost B$</th>
+                        <th style="width: 80px;">IPC Ref</th>
+                        <th style="width: 100px;">Equip Used On</th>
+                        <th style="width: 100px;">Reason For Demand</th>
+                    </tr>
+                </thead>
+                <tbody id="items-tbody">
+                    @forelse($requestModel->items ?? [] as $index => $item)
+                    <tr class="item-row">
+                        <td style="font-weight: 600; color: #6b7280;">{{ $loop->iteration }}</td>
+                        <td><textarea class="baf-textarea item-qty" style="text-align: center;" rows="1" readonly>{{ $item['qty'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" style="text-align: center;" rows="1" readonly>{{ $item['uom'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" style="text-align: center;" rows="1" readonly>{{ $item['req_type'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['stock_code'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['manufacturer'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['part_number'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea item-desc" rows="1" readonly>{{ $item['description'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea item-cost" style="text-align: right;" rows="1" readonly>{{ $item['est_cost'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['ipc_ref'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['equip_used_on'] ?? '' }}</textarea></td>
+                        <td><textarea class="baf-textarea" rows="1" readonly>{{ $item['reason'] ?? '' }}</textarea></td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="12" style="text-align: center; color: #6b7280; padding: 12px;">Tiada item didaftarkan.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PICKING SLIP BLOCK -->
+        <div class="baf-picking-box">
+            <div class="baf-picking-left">
+                <strong style="color: #374151;">PICKING SLIP/DELIVERY INSTRUCTIONS</strong>
+                <div style="margin-top: 6px;">
+                    <input type="text" value="{{ $requestModel->delivery_contact ?? '' }}" class="baf-input" readonly placeholder="Contact TELP / POC">
+                </div>
+                <div style="margin-top: 6px;">
+                    <input type="text" value="{{ $requestModel->delivery_instructions ?? '' }}" class="baf-input" readonly placeholder="Delivery office/location">
+                </div>
+            </div>
+            <div class="baf-picking-right">
+                <strong style="color: #4b5563; font-size: 11px;">TOTAL EST. COST B$</strong>
+                <div style="font-size: 18px; font-weight: 700; color: #111827; margin-top: 2px;" id="total-cost-display">$0.00</div>
+            </div>
+        </div>
+
+        <!-- LOWER AUTHORIZATION SECTIONS -->
+        <div class="baf-bottom-grid">
+            
+            <!-- LEFT COLUMN -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="baf-section-box" style="border: 1px solid #000; padding: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center;">
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EQUIPMENT NO.</label>
+                            <input type="text" value="{{ $requestModel->equipment_no ?? '' }}" class="baf-input" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">WORK ORDER NO.</label>
+                            <input type="text" value="{{ $requestModel->work_order_no ?? '' }}" class="baf-input" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE SUB HEAD</label>
+                            <input type="text" value="{{ $requestModel->vote_sub_head ?? '' }}" class="baf-input" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="baf-section-box" style="border: 1px solid #000; padding: 8px;">
+                    <div style="display: grid; grid-template-columns: 1.2fr 1.2fr 1fr; gap: 8px; text-align: center;">
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">VOTE CONTROLLER</label>
+                            <input type="text" value="{{ $requestModel->vote_title ?? '' }}" class="baf-input" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">IC NUMBER</label>
+                            <input type="text" value="{{ $requestModel->vote_ic_number ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
+                            <input type="text" value="{{ $requestModel->vote_date ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN -->
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="baf-section-box" style="border: 1px solid #000; padding: 8px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1.4fr 1fr; gap: 6px; text-align: center; align-items: start;">
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED BY</label>
+                            <input type="text" value="{{ $requestModel->requested_by_title ?? '' }}" class="baf-input" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EMPLOYEE CODE</label>
+                            <input type="text" value="{{ $requestModel->employee_code ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">SIGNATURE / STAMP</label>
+                            @if(isset($requestModel->signature_path))
+                                <div style="padding: 2px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 4px;">
+                                    <img src="{{ Storage::url($requestModel->signature_path) }}" alt="Signature" style="max-height: 30px; display: block; margin: 0 auto 2px;">
+                                </div>
+                            @else
+                                <span style="font-size: 10px; color: #9ca3af;">No signature</span>
+                            @endif
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED DATE</label>
+                            <input type="text" value="{{ $requestModel->required_by ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="baf-section-box" style="border: 1px solid #000; padding: 8px;">
+                    <div style="display: grid; grid-template-columns: 1.2fr 1fr 1.2fr 1fr; gap: 8px; text-align: center;">
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">AUTHORISED BY</label>
+                            <input type="text" value="{{ $requestModel->auth_title ?? '' }}" class="baf-input" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">EMPLOYEE CODE</label>
+                            <input type="text" value="{{ $requestModel->auth_code ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">IC NUMBER</label>
+                            <input type="text" value="{{ $requestModel->auth_ic_number ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">DATE</label>
+                            <input type="text" value="{{ $requestModel->auth_date ?? '' }}" class="baf-input" style="margin-top: 13px;" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ATTACHMENT DISPLAY SECTION -->
+        @if(isset($requestModel->attachment_path))
+        <div style="margin-top: 16px; padding: 12px; border: 1px solid #d1d5db; background-color: #f9fafb; border-radius: 6px;">
+            <label style="font-weight: 600; display: block; font-size: 11px; margin-bottom: 6px; color: #374151;">ATTACHMENT</label>
+            <a href="{{ Storage::url($requestModel->attachment_path) }}" target="_blank" style="color: #2563eb; text-decoration: underline; font-size: 11px;">
+                View Attached File
+            </a>
+        </div>
+        @endif
+
+        <!-- BACK BUTTON -->
+        <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+            <a href="{{ route('applicant.dashboard') }}" class="btn-back-active">
+                Back to List
+            </a>
+        </div>
     </div>
+
+    <script>
+        function autoExpand(element) {
+            element.style.height = 'auto';
+            element.style.height = element.scrollHeight + 'px';
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            const rows = document.querySelectorAll('#items-tbody .item-row');
+            rows.forEach(row => {
+                const qtyVal = row.querySelector('.item-qty')?.value.replace(/[^0-9.-]+/g, "") || "0";
+                const costVal = row.querySelector('.item-cost')?.value.replace(/[^0-9.-]+/g, "") || "0";
+                
+                const qty = parseFloat(qtyVal) || 0;
+                const cost = parseFloat(costVal) || 0;
+                
+                total += (qty * cost);
+            });
+
+            document.getElementById('total-cost-display').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.baf-textarea').forEach(el => autoExpand(el));
+            calculateTotal();
+        });
+    </script>
 </x-app-layout>

@@ -162,10 +162,19 @@
                                         @endswitch
                                     </td>
                                     <td class="py-3.5 px-6 text-right">
-                                        <a href="{{ route('uet.show', $request->id) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded border border-slate-300">
-                                            Papar
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                        </a>
+                                        @if($request instanceof \App\Models\BafRequest)
+    {{-- Route untuk BAF Q 140 --}}
+    <a href="{{ route('requests.show', $request->id) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded border border-slate-300">
+        Papar
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+@else
+    {{-- Route untuk UET --}}
+    <a href="{{ route('uet.show', $request->id) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded border border-slate-300">
+        Papar
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </a>
+@endif
                                     </td>
                                 </tr>
                             @empty

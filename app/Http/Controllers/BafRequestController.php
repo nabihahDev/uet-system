@@ -2,237 +2,111 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BafRequest;
 use Illuminate\Http\Request;
+use App\Models\BafRequest;
+use App\Models\BafRequestItem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BafRequestController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth');
-    }
-
-    public function index()
-    {
-        $user = Auth::user();
-
-        // Semak jika user adalah Approver/Reviewer (bukan Applicant biasa)
-        $isApprover = in_array($user->role_id, [2, 3, 4, 5, 6]) || $user->role === 'oc';
-
-        if ($isApprover) {
-            $requests = BafRequest::with('creator')->orderBy('created_at', 'desc')->paginate(15);
-        } else {
-            $requests = BafRequest::where('created_by', $user->id)->orderBy('created_at', 'desc')->paginate(15);
-        }
-
-        return view('requests.index', compact('requests'));
-    }
-
+    // 1. Mod Buat Permohonan Baru
     public function create()
     {
-        $user = Auth::user();
-
-        return view('requests.form', [
-            'requestModel' => new BafRequest,
-            'canEditRequester' => true, // Applicant sentiasa boleh isi borang baru
+        $requestModel = new BafRequest();
+        $requestModel->signature_path = auth()->user()->signature_path;
+        
+        // Tetapkan senarai penuh permission flags untuk form.blade.php
+        $permissions = [
+            'canEditRequester'      => true,
             'canEditVoteController' => false,
-            'canEditAuthoriser' => false,
-        ]);
+            'canEditAuthoriser'     => false,
+            'canEditOc'             => false,
+            'canEditQm'             => false,
+        ];
+
+        return view('requests.form', array_merge(['requestModel' => $requestModel], $permissions));
     }
 
+    // 2. Mod Papar / Kemaskini Permohonan Sedia Ada
+    public function show($id)
+    {
+        $requestModel = BafRequest::with('items')->findOrFail($id);
+
+        $permissions = [
+            'canEditRequester'      => $requestModel->status === 'pending_oc' || $requestModel->status === 'draft',
+            'canEditVoteController' => false,
+            'canEditAuthoriser'     => false,
+            'canEditOc'             => false,
+            'canEditQm'             => false,
+        ];
+
+        return view('requests.form', array_merge(['requestModel' => $requestModel], $permissions));
+    }
+
+    // 3. Simpan Permohonan Baru
     public function store(Request $request)
-    {
-        $user = $request->user();
-
-        $validated = $request->validate([
-            'unit_code' => 'required|string|max:100',
-            'priority' => 'nullable|string|max:50',
-            'required_by' => 'nullable|date',
-            'request_type' => 'nullable|string|max:50',
-            'justification' => 'nullable|string',
-            'items' => 'nullable|array',
-            'items.*.item_no' => 'nullable|string|max:50',
-            'items.*.qty' => 'nullable|integer|min:1',
-            'items.*.uom' => 'nullable|string|max:20',
-            'items.*.req_type' => 'nullable|string|max:10',
-            'items.*.stock_code' => 'nullable|string|max:100',
-            'items.*.manufacturer' => 'nullable|string|max:150',
-            'items.*.part_number' => 'nullable|string|max:150',
-            'items.*.description' => 'nullable|string',
-            'items.*.est_cost' => 'nullable|numeric',
-            'items.*.ipc_ref' => 'nullable|string|max:150',
-            'items.*.equip_used_on' => 'nullable|string|max:150',
-            'items.*.reason' => 'nullable|string',
+{
+        $request->validate([
+            'attachment' => ['nullable', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:2048'],
         ]);
 
-        $model = BafRequest::create([
-            'unit_code' => $validated['unit_code'],
-            'priority' => $validated['priority'] ?? 'normal',
-            'required_by' => $validated['required_by'] ?? null,
-            'items' => $validated['items'] ?? [],
-            'user_section' => [
-                'filled_by' => $user->id,
-                'filled_at' => now()->toDateTimeString(),
-                'request_type' => $validated['request_type'] ?? null,
-                'justification' => $validated['justification'] ?? null,
-            ],
-            'created_by' => $user->id,
-            'status' => 'submitted',
-        ]);
+    $signaturePath = auth()->user()->signature_path;
+        $attachmentPath = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('baf-attachments', 'public')
+            : null;
 
-        return redirect()->route('requests.show', $model)->with('success', 'Permohonan BAF Q 140 berjaya dihantar.');
+    // 1. Simpan Rekod Utama BAF (Tambah field yang hilang)
+    $bafRequest = BafRequest::create([
+        'created_by'          => auth()->id() ?? 1,
+        'reference_no'        => 'REQ-' . time(),
+        'requisition_type'    => $request->input('requisition_type'), // STOCK / SERVICES / RETURN
+        'unit'                => $request->input('unit_code'),
+        'required_by_date'    => $request->input('required_by_date'),
+        'priority'            => $request->input('priority'),
+        'part_issue'          => $request->input('part_issue'),
+        'daripada'            => $request->input('requested_by_title'),
+        'employee_code'       => $request->input('employee_code'),
+        'request_date'        => $request->input('requested_date'),
+        'status'              => 'Pending',
+        'work_order_no'       => $request->input('work_order_no'),
+        'equipment_no'        => $request->input('equipment_no'),
+        'vote_sub_head'       => $request->input('vote_sub_head'),
+        'picking_slip'        => $request->input('delivery_contact'),
+        'delivery_instructions' => $request->input('delivery_instructions'),
+        'signature_path'      => $signaturePath,
+        'attachment_path'    => $attachmentPath,
+        'vote_title'         => $request->input('vote_title'),
+        'vote_date'          => $request->input('vote_date'),
+        'auth_title'         => $request->input('auth_title'),
+        'auth_code'          => $request->input('auth_code'),
+        'auth_date'          => $request->input('auth_date'),
+    ]);
+
+    // 2. Simpan Item-Item Table (Masukkan semua lajur)
+    if ($request->has('items') && is_array($request->items)) {
+        foreach ($request->items as $item) {
+            if (!empty($item['description'])) {
+                $estimatedCost = preg_replace('/[^0-9.-]/', '', (string) ($item['est_cost'] ?? '0'));
+
+                $bafRequest->items()->create([
+                    'quantity_demanded' => $item['qty'] ?? 0,
+                    'unit_of_measure'   => $item['uom'] ?? null,
+                    'req_type_sp'       => $item['req_type'] ?? null,
+                    'stock_code'        => $item['stock_code'] ?? null,
+                    'suggested_mfr'     => $item['manufacturer'] ?? null,
+                    'part_no'           => $item['part_number'] ?? null,
+                    'item_description'  => $item['description'],
+                    'est_cost'          => $estimatedCost !== '' ? $estimatedCost : 0,
+                    'ipc_ref'           => $item['ipc_ref'] ?? null,
+                    'equip_used_on'     => $item['equip_used_on'] ?? null,
+                    'remarks'           => $item['reason'] ?? null,
+                ]);
+            }
+        }
     }
 
-    public function show(BafRequest $requestModel)
-    {
-        $user = Auth::user();
-        $status = $requestModel->status;
-        $isOc = ($user->role_id === 2 || $user->role === 'oc');
-
-        return view('requests.show', [
-            'requestModel' => $requestModel,
-            // Applicant boleh edit jika borang masih draf atau dikembalikan
-            'canEditRequester' => ($user->created_by === $user->id || $user->role_id === 1) && in_array($status, ['draft', 'returned']),
-            
-            // OC / Vote Controller boleh edit apabila status 'submitted'
-            'canEditVoteController' => $isOc && in_array($status, ['submitted', 'oc_endorsed']),
-            
-            // Authoriser/CO
-            'canEditAuthoriser' => in_array($user->role_id, [2, 3, 6]) && in_array($status, ['submitted', 'oc_endorsed', 'co_authorized']),
-        ]);
-    }
-
-    public function update(Request $request, BafRequest $requestModel)
-    {
-        $user = $request->user();
-
-        // 1. APPLICANT / USER update bahagian sendiri
-        if ($user->role_id === 1 || $user->id === $requestModel->created_by) {
-            $validated = $request->validate([
-                'unit_code' => 'required|string|max:100',
-                'required_by' => 'nullable|date',
-                'items' => 'nullable|array',
-            ]);
-
-            $userSection = $requestModel->user_section ?? [];
-            $userSection['updated_by'] = $user->id;
-            $userSection['updated_at'] = now()->toDateTimeString();
-
-            $requestModel->update([
-                'unit_code' => $validated['unit_code'],
-                'required_by' => $validated['required_by'] ?? $requestModel->required_by,
-                'items' => $validated['items'] ?? $requestModel->items ?? [],
-                'user_section' => $userSection,
-                'status' => 'submitted',
-            ]);
-
-            return back()->with('success', 'Maklumat permohonan telah dikemaskini.');
-        }
-
-        // 2. OC ENDORSEMENT
-        if ($user->role_id === 2 || $user->role === 'oc') {
-            $validated = $request->validate([
-                'oc_note' => 'nullable|string',
-                'oc_endorse' => 'nullable|in:0,1',
-            ]);
-
-            $ocData = array_merge($requestModel->oc_section ?? [], [
-                'note' => $validated['oc_note'] ?? null,
-                'endorsed' => (int)($validated['oc_endorse'] ?? 0),
-                'by' => $user->id,
-                'at' => now()->toDateTimeString()
-            ]);
-
-            $requestModel->oc_section = $ocData;
-            $requestModel->status = ($ocData['endorsed'] ? 'oc_endorsed' : 'returned');
-            $requestModel->save();
-
-            return back()->with('success', 'Keputusan OC telah disimpan.');
-        }
-
-        // 3. CO AUTHORIZATION
-        if ($user->role_id === 3) {
-            $validated = $request->validate([
-                'co_note' => 'nullable|string',
-                'co_authorize' => 'nullable|in:0,1',
-            ]);
-
-            $coData = array_merge($requestModel->co_section ?? [], [
-                'note' => $validated['co_note'] ?? null,
-                'authorized' => (int)($validated['co_authorize'] ?? 0),
-                'by' => $user->id,
-                'at' => now()->toDateTimeString()
-            ]);
-
-            $requestModel->co_section = $coData;
-            $requestModel->status = ($coData['authorized'] ? 'co_authorized' : 'co_rejected');
-            $requestModel->save();
-
-            return back()->with('success', 'Keputusan CO telah disimpan.');
-        }
-
-        // 4. QM VERIFICATION
-        if ($user->role_id === 4) {
-            $validated = $request->validate([
-                'qm_note' => 'nullable|string',
-                'qm_verified' => 'nullable|in:0,1',
-            ]);
-
-            $qmData = array_merge($requestModel->qm_section ?? [], [
-                'note' => $validated['qm_note'] ?? null,
-                'verified' => (int)($validated['qm_verified'] ?? 0),
-                'by' => $user->id,
-                'at' => now()->toDateTimeString()
-            ]);
-
-            $requestModel->qm_section = $qmData;
-            $requestModel->status = ($qmData['verified'] ? 'qm_verified' : 'qm_stop');
-            $requestModel->save();
-
-            return back()->with('success', 'Verifikasi QM telah disimpan.');
-        }
-
-        // 5. PEGAWAI REVIEW
-        if ($user->role_id === 5) {
-            $validated = $request->validate([
-                'pegawai_note' => 'nullable|string',
-            ]);
-
-            $pegawaiData = array_merge($requestModel->pegawai_section ?? [], [
-                'note' => $validated['pegawai_note'] ?? null,
-                'by' => $user->id,
-                'at' => now()->toDateTimeString()
-            ]);
-
-            $requestModel->pegawai_section = $pegawaiData;
-            $requestModel->status = 'pegawai_reviewed';
-            $requestModel->save();
-
-            return back()->with('success', 'Semakan Pegawai telah disimpan.');
-        }
-
-        // 6. MINDEF FINAL DECISION
-        if ($user->role_id === 6) {
-            $validated = $request->validate([
-                'mindef_decision' => 'required|in:approved,rejected',
-                'mindef_note' => 'nullable|string',
-            ]);
-
-            $mindef = [
-                'decision' => $validated['mindef_decision'],
-                'note' => $validated['mindef_note'] ?? null,
-                'by' => $user->id,
-                'at' => now()->toDateTimeString()
-            ];
-
-            $requestModel->mindef_section = $mindef;
-            $requestModel->status = ($validated['mindef_decision'] === 'approved') ? 'approved' : 'rejected';
-            $requestModel->save();
-
-            return back()->with('success', 'Keputusan Akhir MINDEF telah disimpan.');
-        }
-
-        abort(403);
-    }
+    return redirect()->route('requests.show', $bafRequest)->with('success', 'Borang berjaya disimpan!');
+}
 }

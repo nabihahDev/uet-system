@@ -9,36 +9,43 @@ class BafRequest extends Model
 {
     use HasFactory;
 
-    protected $table = 'baf_requests';
-
-    protected $casts = [
-        'items' => 'array',
-        'user_section' => 'array',
-        'oc_section' => 'array',
-        'co_section' => 'array',
-        'qm_section' => 'array',
-        'pegawai_section' => 'array',
-        'mindef_section' => 'array',
-        'required_by' => 'date',
-    ];
-
     protected $fillable = [
-        'unit_code',
-        'priority',
-        'required_by',
-        'status',
-        'items',
-        'user_section',
-        'oc_section',
-        'co_section',
-        'qm_section',
-        'pegawai_section',
-        'mindef_section',
         'created_by',
+        'reference_no',
+        'requisition_type',
+        'unit',
+        'required_by_date',
+        'priority',
+        'part_issue',
+        'daripada',
+        'employee_code',
+        'request_date',
+        'status',
+        'work_order_no',
+        'equipment_no',
+        'vote_sub_head',
+        'picking_slip',
+        'delivery_instructions',
+        'attachment_path',
+        'signature_path', 
+        'signature_hash',
+        'vote_title',
+        'vote_signature_path',
+        'vote_date',
+        'auth_title',
+        'auth_code',
+        'auth_signature_path',
+        'auth_date',
+        'remarks',
     ];
 
-    public function creator()
+    public function user()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function items()
+    {
+        return $this->hasMany(BafRequestItem::class, 'baf_request_id');
     }
 }

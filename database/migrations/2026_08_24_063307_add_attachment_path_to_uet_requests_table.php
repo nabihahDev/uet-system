@@ -10,16 +10,20 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-{
-    Schema::table('uet_requests', function (Blueprint $table) {
-        $table->string('attachment_path')->nullable()->after('id');
-    });
-}
+    {
+        if (!Schema::hasColumn('uet_requests', 'attachment_path')) {
+            Schema::table('uet_requests', function (Blueprint $table) {
+                $table->string('attachment_path')->nullable()->after('id');
+            });
+        }
+    }
 
-public function down(): void
-{
-    Schema::table('uet_requests', function (Blueprint $table) {
-        $table->dropColumn('attachment_path');
-    });
-}
+    public function down(): void
+    {
+        if (Schema::hasColumn('uet_requests', 'attachment_path')) {
+            Schema::table('uet_requests', function (Blueprint $table) {
+                $table->dropColumn('attachment_path');
+            });
+        }
+    }
 };
