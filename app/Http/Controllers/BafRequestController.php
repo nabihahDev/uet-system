@@ -34,15 +34,9 @@ class BafRequestController extends Controller
     {
         $requestModel = BafRequest::with('items')->findOrFail($id);
 
-        $permissions = [
-            'canEditRequester'      => $requestModel->status === 'pending_oc' || $requestModel->status === 'draft',
-            'canEditVoteController' => false,
-            'canEditAuthoriser'     => false,
-            'canEditOc'             => false,
-            'canEditQm'             => false,
-        ];
-
-        return view('requests.form', array_merge(['requestModel' => $requestModel], $permissions));
+        // Use display view for read-only view (Papar mode)
+        // This ensures the form cannot be edited from the view
+        return view('requests.display', compact('requestModel'));
     }
 
     // 3. Simpan Permohonan Baru
@@ -63,13 +57,13 @@ class BafRequestController extends Controller
         'reference_no'        => 'REQ-' . time(),
         'requisition_type'    => $request->input('requisition_type'), // STOCK / SERVICES / RETURN
         'unit'                => $request->input('unit_code'),
-        'required_by_date'    => $request->input('required_by_date'),
+        'required_by_date'    => $request->input('required_by_date') ?: now()->toDateString(),
         'priority'            => $request->input('priority'),
         'part_issue'          => $request->input('part_issue'),
         'daripada'            => $request->input('requested_by_title'),
         'employee_code'       => $request->input('employee_code'),
-        'request_date'        => $request->input('requested_date'),
-        'status'              => 'Pending',
+        'request_date'        => $request->input('requested_date') ?: now()->toDateString(),
+        'status'              => $request->boolean('continue_to_uet') ? 'draft' : 'pending_oc',
         'work_order_no'       => $request->input('work_order_no'),
         'equipment_no'        => $request->input('equipment_no'),
         'vote_sub_head'       => $request->input('vote_sub_head'),
@@ -105,6 +99,10 @@ class BafRequestController extends Controller
                 ]);
             }
         }
+    }
+
+    if ($request->boolean('continue_to_uet')) {
+        return redirect()->route('uet.create', ['baf_request_id' => $bafRequest->id]);
     }
 
     return redirect()->route('requests.show', $bafRequest)->with('success', 'Borang berjaya disimpan!');

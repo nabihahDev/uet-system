@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UetRequest;
+use App\Models\BafRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -14,10 +15,22 @@ class UetApplicantController extends Controller
     // Applicant Dashboard View
     public function index()
     {
-        $requests = UetRequest::where('applicant_id', Auth::id())
+        $userId = Auth::id();
+
+        // Get BAF requests
+        $bafRequests = BafRequest::where('created_by', $userId)
+            ->with('items')
+            ->latest()
+            ->get();
+
+        // Get UET requests
+        $uetRequests = UetRequest::where('applicant_id', $userId)
             ->with(['items', 'approval'])
             ->latest()
-            ->paginate(10); 
+            ->get();
+
+        // Combine and sort by creation date (newest first)
+        $requests = $bafRequests->concat($uetRequests)->sortByDesc('created_at');
 
         return view('applicant.dashboard', compact('requests'));
     }
@@ -25,7 +38,9 @@ class UetApplicantController extends Controller
     // Show Create Form
     public function create()
     {
-        return view('applicant.create');
+        return view('applicant.create', [
+            'bafRequestId' => request()->integer('baf_request_id') ?: null,
+        ]);
     }
 
     // Store Request with Multiple Items and Attachment
@@ -48,7 +63,25 @@ class UetApplicantController extends Controller
             'items.*.alasan' => 'nullable|string',
         ]);
 
-        DB::transaction(function () use ($validated, $request) {
+        $action = $request->input('action', 'submit'); // Default to submit if not specified
+        $isDraft = ($action === 'draft');
+
+        // Applicant cannot submit OC/QM-only fields. Ignore any tampered client-side values.
+        if (Auth::user()->role === 'applicant') {
+            $request->merge([
+                'ulasan_timb_peg_turus' => null,
+                'keputusan_jkg' => null,
+                'catatan_jku' => null,
+                'keputusan_jku' => null,
+                'bilangan_diluluskan' => null,
+                'bilangan_tidak_diluluskan' => null,
+                'pindaan_bilangan_jku' => null,
+                'nama_pembantu_staf_jku' => null,
+                'nama_timb_peg_turus_jku' => null,
+            ]);
+        }
+
+        $uet = DB::transaction(function () use ($validated, $request, $isDraft) {
             // Handle file upload
             $attachmentPath = null;
             if ($request->hasFile('attachment')) {
@@ -62,10 +95,10 @@ class UetApplicantController extends Controller
                 'kepada' => $validated['kepada'],
                 'daripada' => $validated['daripada'],
                 'unit' => $validated['unit'],
-                'tarikh' => $validated['tarikh'],
+                'tarikh' => $validated['tarikh'] ?? now()->toDateString(),
                 'nama_pemohon' => $validated['nama_pemohon'] ?? Auth::user()->name,
                 'attachment_path' => $attachmentPath,
-                'status' => 'pending_oc',
+                'status' => $isDraft ? 'draft' : 'pending_oc',
             ];
 
             // Assign OC fields if user is OC
@@ -89,9 +122,28 @@ class UetApplicantController extends Controller
                     'alasan' => $item['alasan'] ?? null,
                 ]);
             }
+
+            if ($request->filled('baf_request_id')) {
+                BafRequest::whereKey($request->integer('baf_request_id'))
+                    ->where('created_by', Auth::id())
+                    ->where('status', 'draft')
+                    ->update(['status' => 'pending_oc']);
+            }
+
+            return $uet;
         });
 
-        return redirect()->route('dashboard')->with('success', 'Permohonan UET berjaya dihantar!');
+        // Handle redirect based on action
+        if ($isDraft) {
+            return redirect()->route('applicant.dashboard')->with('success', 'Borang UET berjaya disimpan sebagai draf.');
+        }
+
+        // On submit, redirect to BAF if user selected "Ya" in the alert
+        if ($request->input('redirect_to_baf') === 'true') {
+            return redirect()->route('bafq140.create')->with('success', 'Permohonan UET berjaya dihantar! Sekarang sila isi borang BAF Q 140.');
+        }
+
+        return redirect()->route('applicant.dashboard')->with('success', 'Permohonan UET berjaya dihantar!');
     }
 
     // Show Request Details

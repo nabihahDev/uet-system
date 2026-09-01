@@ -246,6 +246,7 @@
         @if(isset($requestModel) && $requestModel->exists)
             @method('PUT')
         @endif
+        <input type="hidden" name="continue_to_uet" id="continue-to-uet" value="0">
 
         <!-- HEADER SECTION -->
 <div class="baf-header">
@@ -488,7 +489,7 @@
                         </div>
                         <div>
                             <label style="font-weight: 600; display: block; font-size: 10px; margin-bottom: 4px; color: #4b5563;">REQUESTED DATE</label>
-                            <input type="date" name="requested_date" value="{{ old('requested_date', $requestModel->request_date ?? '') }}" class="baf-input" style="width: 100%; margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
+                            <input type="date" name="requested_date" value="{{ old('requested_date', $requestModel->request_date ?? now()->format('Y-m-d')) }}" class="baf-input" style="width: 100%; margin-top: 13px;" {{ $canEditRequester ? '' : 'readonly' }}>
                         </div>
                     </div>
                 </div>
@@ -681,7 +682,8 @@
                 if (result.isConfirmed) {
                     bafForm.submit();
                 } else if (result.dismiss === Swal.DismissReason.cancel) {
-                    window.location.href = "{{ route('uet.create') }}";
+                    document.getElementById('continue-to-uet').value = '1';
+                    bafForm.submit();
                 }
             });
         });

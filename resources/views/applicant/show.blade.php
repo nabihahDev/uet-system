@@ -6,12 +6,23 @@
                 size: A4 landscape;
                 margin: 8mm;
             }
+            
+            /* Hide app layout navigation and header */
+            header, nav, .navbar, [role="navigation"], .nav-primary, .nav-secondary {
+                display: none !important;
+            }
+            
+            /* Reset body styling for print */
             body {
                 background: white !important;
                 color: black !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
+            
+            /* Hide all non-print elements */
             .print\:hidden {
                 display: none !important;
             }
@@ -35,7 +46,7 @@
 
             <!-- HEADER ACTIONS / NAVIGATION -->
             <div class="flex justify-between items-center mb-4 print:hidden">
-                <a href="{{ route('uet.index') }}" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded transition-colors inline-flex items-center gap-1">
+                <a href="{{ route('applicant.dashboard') }}" class="px-4 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded transition-colors inline-flex items-center gap-1">
                     &larr; Kembali
                 </a>
                 <div class="flex gap-2">

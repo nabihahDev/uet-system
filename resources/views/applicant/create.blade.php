@@ -16,9 +16,13 @@
 
             <form action="{{ isset($uetRequest) ? route('uet.update', $uetRequest->id) : route('uet.store') }}" method="POST" enctype="multipart/form-data" id="uetForm">
                 @csrf
+                @if(!empty($bafRequestId))
+                    <input type="hidden" name="baf_request_id" value="{{ $bafRequestId }}">
+                @endif
                 @if(isset($uetRequest))
                     @method('PUT')
                 @endif
+                <input type="hidden" id="redirectToBaf" name="redirect_to_baf" value="false">
 
                 <!-- HEADER SECTION: Metadata -->
                 <div class="grid grid-cols-12 gap-x-4 mb-4">
@@ -52,7 +56,7 @@
                         </div>
                         <div class="flex p-1.5 items-center">
                             <label class="w-20 font-bold uppercase text-[11px]">Tarikh:</label>
-                            <input type="date" name="tarikh" value="{{ old('tarikh', $uetRequest->tarikh ?? date('Y-m-d')) }}" required 
+                            <input type="date" name="tarikh" value="{{ old('tarikh', $uetRequest->tarikh ?? now()->format('Y-m-d')) }}" required 
                                    @if(auth()->user()->role === 'oc' || auth()->user()->role === 'qm') readonly @endif
                                    class="flex-1 border border-slate-300 p-1 text-xs uppercase focus:ring-1 focus:ring-slate-800 {{ auth()->user()->role === 'oc' || auth()->user()->role === 'qm' ? 'bg-slate-100 cursor-not-allowed' : '' }}">
                         </div>
@@ -182,21 +186,21 @@
                                     <td class="p-1 bg-amber-50/50">
                                         <textarea name="ulasan_timb_peg_turus" rows="2" 
                                                   @if(auth()->user()->role !== 'oc') readonly @endif 
-                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'oc' ? 'bg-transparent cursor-not-allowed text-slate-500' : 'bg-white border border-amber-300' }}">{{ old('ulasan_timb_peg_turus', $uetRequest->approval->ulasan_timb_peg_turus ?? '') }}</textarea>
+                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'oc' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white border border-amber-300' }}">{{ old('ulasan_timb_peg_turus', $uetRequest->approval->ulasan_timb_peg_turus ?? '') }}</textarea>
                                     </td>
 
                                     <!-- (k) Keputusan QM -->
                                     <td class="p-1 bg-slate-50">
                                         <textarea name="keputusan_jkg" rows="2" 
                                                   @if(auth()->user()->role !== 'qm') readonly @endif 
-                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'qm' ? 'bg-transparent cursor-not-allowed text-slate-500' : 'bg-white border border-slate-300' }}">{{ old('keputusan_jkg', $uetRequest->approval->keputusan_jkg ?? '') }}</textarea>
+                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'qm' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white border border-slate-300' }}">{{ old('keputusan_jkg', $uetRequest->approval->keputusan_jkg ?? '') }}</textarea>
                                     </td>
 
                                     <!-- (l) Catatan JKU -->
                                     <td class="p-1 bg-slate-50 relative">
                                         <textarea name="catatan_jku" rows="2" 
                                                   @if(auth()->user()->role !== 'qm') readonly @endif 
-                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'qm' ? 'bg-transparent cursor-not-allowed text-slate-500' : 'bg-white border border-slate-300' }}">{{ old('catatan_jku', $uetRequest->approval->catatan_jku ?? '') }}</textarea>
+                                                  class="w-full text-[10px] p-0.5 border-0 focus:ring-0 resize-none {{ auth()->user()->role !== 'qm' ? 'bg-slate-100 cursor-not-allowed text-slate-500' : 'bg-white border border-slate-300' }}">{{ old('catatan_jku', $uetRequest->approval->catatan_jku ?? '') }}</textarea>
                                         
                                         @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm')
                                             <button type="button" class="remove-row text-red-600 font-bold absolute right-1 top-1 {{ count($items) === 1 ? 'hidden' : '' }}">×</button>
@@ -250,15 +254,23 @@
             <div class="font-bold text-[11px]">4. Keputusan Jawatankuasa tetap cadangan ECC/UETSC</div>
             <div class="pl-4 space-y-2">
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" name="keputusan_jku" value="diluluskan" class="rounded border-slate-400" {{ old('keputusan_jku') === 'diluluskan' ? 'checked' : '' }}>
+                    <input type="checkbox" name="keputusan_jku" value="diluluskan" 
+                           @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                           class="rounded border-slate-400" {{ old('keputusan_jku') === 'diluluskan' ? 'checked' : '' }}>
                     <span class="text-xs">a. Diluluskan bagi pindaan kepada bilangan :</span>
-                    <input type="text" name="bilangan_diluluskan" value="{{ old('bilangan_diluluskan') }}" class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
+                    <input type="text" name="bilangan_diluluskan" value="{{ old('bilangan_diluluskan') }}" 
+                           @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                           class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
                 </div>
-                
+                 
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" name="keputusan_jku" value="tidak_diluluskan" class="rounded border-slate-400" {{ old('keputusan_jku') === 'tidak_diluluskan' ? 'checked' : '' }}>
+                    <input type="checkbox" name="keputusan_jku" value="tidak_diluluskan" 
+                           @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                           class="rounded border-slate-400" {{ old('keputusan_jku') === 'tidak_diluluskan' ? 'checked' : '' }}>
                     <span class="text-xs">b. Tidak diluluskan bagi pindaan kepada bilangan :</span>
-                    <input type="text" name="bilangan_tidak_diluluskan" value="{{ old('bilangan_tidak_diluluskan') }}" class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
+                    <input type="text" name="bilangan_tidak_diluluskan" value="{{ old('bilangan_tidak_diluluskan') }}" 
+                           @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                           class="border-b border-slate-800 px-1 text-xs w-24 bg-transparent focus:outline-none">
                 </div>
             </div>
         </div>
@@ -280,17 +292,23 @@
 
         <div>
             <label class="block font-bold mb-1 text-[11px]">6. Pindaan oleh Pembantu Staf JKU :</label>
-            <input type="text" name="pindaan_bilangan_jku" value="{{ old('pindaan_bilangan_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold">
+            <input type="text" name="pindaan_bilangan_jku" value="{{ old('pindaan_bilangan_jku') }}" 
+                   @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                   class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold">
         </div>
 
         <div>
             <label class="block font-bold mb-1 text-[11px]">7. Nama Pembantu Staf JKU :</label>
-            <input type="text" name="nama_pembantu_staf_jku" value="{{ old('nama_pembantu_staf_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
+            <input type="text" name="nama_pembantu_staf_jku" value="{{ old('nama_pembantu_staf_jku') }}" 
+                   @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                   class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
         </div>
 
         <div>
             <label class="block font-bold mb-1 text-[11px]">8. Nama Timb Peg Turus PP & JKU :</label>
-            <input type="text" name="nama_timb_peg_turus_jku" value="{{ old('nama_timb_peg_turus_jku') }}" class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
+            <input type="text" name="nama_timb_peg_turus_jku" value="{{ old('nama_timb_peg_turus_jku') }}" 
+                   @if(auth()->user()->role !== 'oc' && auth()->user()->role !== 'qm') disabled @endif
+                   class="w-full border border-slate-400 p-1 text-xs bg-white font-semibold uppercase">
         </div>
     </div>
 </div>
@@ -318,11 +336,38 @@
                     <button type="submit" name="action" value="draft" class="px-5 py-2 border border-slate-800 text-slate-800 font-bold hover:bg-slate-100">
                         Simpan Draf
                     </button>
-                    <button type="submit" name="action" value="submit" class="px-6 py-2 bg-slate-900 text-white font-bold hover:bg-slate-800">
+                    <button type="submit" name="action" value="submit" id="hantarBtn" class="px-6 py-2 bg-slate-900 text-white font-bold hover:bg-slate-800">
                         Hantar Permohonan
                     </button>
                 </div>
             </form>
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.getElementById('uetForm').addEventListener('submit', function(e) {
+                    const action = e.submitter.value;
+                    if (action === 'submit') {
+                        e.preventDefault();
+                        Swal.fire({
+                            title: 'Pengesahan Hantar Permohonan',
+                            text: 'Permohonan UET akan dihantar. Adakah anda ingin terus isi borang BAF Q 140 selepas ini?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#b45309',
+                            cancelButtonColor: '#6b7280',
+                            confirmButtonText: 'Ya, saya akan isi BAF Q 140',
+                            cancelButtonText: 'Tidak, langsung hantar saja',
+                            allowOutsideClick: false,
+                            allowEscapeKey: false
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                document.getElementById('redirectToBaf').value = 'true';
+                            }
+                            document.getElementById('uetForm').submit();
+                        });
+                    }
+                });
+            </script>
         </div>
     </div>
 
