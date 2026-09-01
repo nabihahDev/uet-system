@@ -14,7 +14,7 @@ class BafRequestFormTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get('/requests/create');
+        $response = $this->actingAs($user)->get('/baf/create');
 
         $response->assertStatus(200)
             ->assertSeeText('Create New Requisition')

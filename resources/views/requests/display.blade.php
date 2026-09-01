@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-display-layout>
     {{-- CSS Khas Untuk Cetakan --}}
     <style>
         @media print {
@@ -314,7 +314,10 @@
                 @php
                     $totalCost = 0;
                     foreach($requestModel->items ?? [] as $itm) {
-                        $totalCost += (float)($itm->est_cost ?? 0) * (float)($itm->quantity_demanded ?? 1);
+                        // Only count items that have a description or cost (exclude blank rows)
+                        if (!empty($itm->est_cost) || !empty($itm->item_description)) {
+                            $totalCost += (float)($itm->est_cost ?? 0) * (float)($itm->quantity_demanded ?? 1);
+                        }
                     }
                 @endphp
                 <div style="font-size: 18px; font-weight: 700; color: #111827; margin-top: 2px;">
@@ -452,4 +455,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-display-layout>

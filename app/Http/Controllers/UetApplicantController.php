@@ -99,6 +99,7 @@ class UetApplicantController extends Controller
                 'nama_pemohon' => $validated['nama_pemohon'] ?? Auth::user()->name,
                 'attachment_path' => $attachmentPath,
                 'status' => $isDraft ? 'draft' : 'pending_oc',
+                'baf_request_id' => $request->filled('baf_request_id') ? $request->integer('baf_request_id') : null,
             ];
 
             // Assign OC fields if user is OC
@@ -158,7 +159,6 @@ class UetApplicantController extends Controller
         ->where('applicant_id', Auth::id())
         ->findOrFail($id);
 
-        // Jika Blade view guna $uetRequest
         return view('applicant.show', compact('uetRequest'));
     }
 

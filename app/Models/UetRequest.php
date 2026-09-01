@@ -28,4 +28,9 @@ class UetRequest extends Model
     {
         return $this->hasOne(UetApproval::class);
     }
+
+    public function bafRequest()
+    {
+        return $this->belongsTo(BafRequest::class);
+    }
 }

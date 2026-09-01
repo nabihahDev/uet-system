@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-display-layout>
     {{-- CSS Khas Untuk Cetakan --}}
     <style>
         @media print {
@@ -353,4 +353,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-display-layout>

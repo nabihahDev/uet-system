@@ -105,6 +105,6 @@ class BafRequestController extends Controller
         return redirect()->route('uet.create', ['baf_request_id' => $bafRequest->id]);
     }
 
-    return redirect()->route('requests.show', $bafRequest)->with('success', 'Borang berjaya disimpan!');
+    return redirect()->route('baf.show', $bafRequest)->with('success', 'Borang berjaya disimpan!');
 }
 }

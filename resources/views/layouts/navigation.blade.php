@@ -32,8 +32,8 @@
                     </a>
 
                     <!-- BAF Q 140 Link -->
-                    <a href="{{ route('requests.create') }}" 
-                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('requests.*') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
+                    <a href="{{ route('baf.create') }}"
+                       class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium leading-5 transition duration-150 ease-in-out {{ request()->routeIs('baf.create') ? 'border-blue-400 text-white font-semibold' : 'border-transparent text-slate-300 hover:text-white hover:border-slate-500' }}">
                         {{ __('BAF Q 140') }}
                     </a>
                 </div>
@@ -103,7 +103,7 @@
             </x-responsive-nav-link>
 
             <!-- Mobile BAF Q 140 Link -->
-            <x-responsive-nav-link :href="route('requests.create')" :active="request()->routeIs('requests.*')" class="text-white">
+            <x-responsive-nav-link :href="route('baf.create')" :active="request()->routeIs('baf.create')" class="text-white">
                 {{ __('BAF Q 140') }}
             </x-responsive-nav-link>
         </div>

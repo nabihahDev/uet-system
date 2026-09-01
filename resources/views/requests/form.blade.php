@@ -238,7 +238,7 @@
 
     <div class="baf-form-container">
     <form id="baf-form" 
-          action="{{ isset($requestModel) && $requestModel->exists ? route('requests.update', $requestModel->id) : route('requests.store') }}" 
+          action="{{ isset($requestModel) && $requestModel->exists ? route('baf.update', $requestModel->id) : route('baf.store') }}" 
           method="POST" 
           enctype="multipart/form-data">
         @csrf
@@ -409,8 +409,12 @@
     if (isset($items) && is_iterable($items)) {
         foreach ($items as $itm) {
             $cost = is_array($itm) ? ($itm['est_cost'] ?? 0) : ($itm->est_cost ?? 0);
-            $qty = is_array($itm) ? ($itm['qty'] ?? 1) : ($itm->qty ?? 1);
-            $totalCost += (float)$cost * (float)$qty;
+            $desc = is_array($itm) ? ($itm['description'] ?? '') : ($itm->item_description ?? '');
+            // Only count items that have a description or cost (exclude blank rows)
+            if (!empty($cost) || !empty($desc)) {
+                $qty = is_array($itm) ? ($itm['qty'] ?? 1) : ($itm->qty ?? 1);
+                $totalCost += (float)$cost * (float)$qty;
+            }
         }
     }
 @endphp
@@ -621,13 +625,16 @@
         let total = 0;
         const rows = document.querySelectorAll('#items-tbody .item-row');
         rows.forEach(row => {
-            const qtyVal = row.querySelector('.item-qty').value.replace(/[^0-9.-]+/g, "");
+            const descVal = row.querySelector('.item-desc').value.trim();
             const costVal = row.querySelector('.item-cost').value.replace(/[^0-9.-]+/g, "");
-            
-            const qty = parseFloat(qtyVal) || 0;
             const cost = parseFloat(costVal) || 0;
             
-            total += (qty * cost);
+            // Only count rows that have a description or cost
+            if (descVal || cost) {
+                const qtyVal = row.querySelector('.item-qty').value.replace(/[^0-9.-]+/g, "");
+                const qty = parseFloat(qtyVal) || 1;
+                total += (qty * cost);
+            }
         });
 
         document.getElementById('total-cost-display').textContent = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

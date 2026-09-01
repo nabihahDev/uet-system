@@ -30,8 +30,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // BAF Q140 Routes
     Route::get('/bafq140/create', [BafRequestController::class, 'create'])->name('bafq140.create');
 
-    // BAF Requests
-    Route::resource('requests', BafRequestController::class)->except(['edit', 'destroy']);
+    // BAF Routes (RESTful)
+    Route::resource('baf', BafRequestController::class)->except(['edit', 'destroy']);
 });
 
 // --------------------------------------------------------------------------
